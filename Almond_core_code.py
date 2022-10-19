@@ -2393,3 +2393,39 @@ heatmap = sns.heatmap(cor_gm.corr(), annot =True,cmap='BrBG', vmin = -1, vmax =1
 sns.set(font_scale=3.5)
 plt.tight_layout()
 plt.savefig('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/QE-presentation/aci_cor_matrix.png', dpi = 200)
+
+
+
+##m load autogluon prediction
+AG_rcp45_tech_2010_sum = np.zeros((17,100,120))
+AG_rcp45_tech_2010_sum_s = np.zeros((17,100,120))
+AG_rcp85_tech_2010_sum = np.zeros((17,100,120))
+AG_rcp85_tech_2010_sum_s = np.zeros((17,100,120))
+AG_rcp45_to_2020_sum = np.zeros((17,100,120))
+AG_rcp45_to_2020_sum_s = np.zeros((17,100,120))
+AG_rcp85_to_2020_sum = np.zeros((17,100,120))
+AG_rcp85_to_2020_sum_s = np.zeros((17,100,120))
+for trial in range(0,100):
+    AG_rcp45_tech_2010_sum[:,trial,:] = np.load('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/autogluon/YLD_sum_rcp45_tech_2010_'+str(trial+1)+'.npy')
+    AG_rcp45_tech_2010_sum_s[:,trial,:] = np.load('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/autogluon/YLD_sum_rcp45_tech_2010_s_'+str(trial+1)+'.npy')
+    AG_rcp85_tech_2010_sum[:,trial,:] = np.load('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/autogluon/YLD_sum_rcp85_tech_2010_'+str(trial+1)+'.npy')
+    AG_rcp85_tech_2010_sum_s[:,trial,:] = np.load('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/autogluon/YLD_sum_rcp85_tech_2010_s_'+str(trial+1)+'.npy')
+    AG_rcp45_to_2020_sum[:,trial,:] = np.load('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/autogluon/YLD_sum_rcp45_to_2020_'+str(trial+1)+'.npy')
+    AG_rcp45_to_2020_sum_s[:,trial,:] = np.load('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/autogluon/YLD_sum_rcp45_to_2020_s_'+str(trial+1)+'.npy')
+    AG_rcp85_to_2020_sum[:,trial,:] = np.load('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/autogluon/YLD_sum_rcp85_to_2020_'+str(trial+1)+'.npy')
+    AG_rcp85_to_2020_sum_s[:,trial,:] = np.load('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/autogluon/YLD_sum_rcp85_to_2020_s_'+str(trial+1)+'.npy')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
