@@ -1,0 +1,1724 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Mar 31 17:03:48 2022
+
+@author: 0shqwu
+"""
+import math 
+import matplotlib.pyplot as plt 
+import pandas as pd
+import numpy as np
+import netCDF4 as nc
+from numpy import genfromtxt
+import scipy.stats as st
+from numpy import savetxt
+import matplotlib.patches as mpatches
+import matplotlib
+import seaborn as sns
+from scipy import signal
+from scipy import stats
+from matplotlib.lines import Line2D
+import matplotlib as mpl
+from matplotlib.legend_handler import HandlerTuple
+import matplotlib.legend_handler
+import geopandas
+from matplotlib.ticker import (MultipleLocator, FormatStrFormatter, AutoMinorLocator)
+import matplotlib.font_manager as font_manager
+
+def tsplot(x, y, n=2, percentile_min=2.5, percentile_max=97.5, color='r', plot_mean=False, plot_median=False, line_color='k', **kwargs):
+    # calculate the lower and upper percentile groups, skipping 50 percentile
+    perc1 = np.percentile(y, np.linspace(percentile_min, 31, num=n, endpoint=False), axis=0)
+    perc2 = np.percentile(y, np.linspace(71.5, percentile_max, num=n+1)[1:], axis=0)
+
+    if 'alpha' in kwargs:
+        alpha = kwargs.pop('alpha')
+    else:
+        alpha = 1/n
+    # fill lower and upper percentile groups
+    for p1, p2 in zip(perc1, perc2):
+        plt.fill_between(x, p1, p2, alpha=alpha, color=color, edgecolor='k')
+
+    if plot_mean:
+        plt.plot(x, np.mean(y, axis=0), color=line_color)
+
+
+    if plot_median:
+        plt.plot(x, np.median(y, axis=0), color=line_color)
+    
+    return plt.gca()
+##yield time series
+t = np.arange(2021,2100,1)
+plt.figure(figsize = (36,14))
+plt.subplot(1,2,1)
+plt.title('RCP4.5', fontsize = 35)
+tsplot(t,np.transpose(future_tech_trend_rcp45[41:]), color = 'darkorchid')
+plt.plot(t,np.median(future_tech_trend_rcp45[41:], axis=1), color = 'darkorchid', linewidth = 4)
+tsplot(t, np.transpose(yield_all_future_rcp45), color = 'royalblue')
+plt.plot(t,np.median(yield_all_future_rcp45, axis=1), color = 'b', linestyle = 'solid', linewidth = 4)
+tsplot(t, np.transpose(yield_all_future_rcp45_s), color = 'lightcoral')
+plt.plot(t,np.median(yield_all_future_rcp45_s, axis=1), color = 'r',linestyle = 'solid',  linewidth = 4)
+blue_patch = mpatches.Patch(color = 'royalblue', label = 'Climate change + tech trend')
+red_patch = mpatches.Patch(color = 'lightcoral', label = 'Climate change + no tech trend past 2020')
+grey_patch = mpatches.Patch(color = 'grey', label = 'Historical simulations')
+purple_patch = mpatches.Patch(color = 'darkorchid', label = 'Constant Tech-trend only')
+blank_patch = mpatches.Patch(color = 'white', label = 'Future projections:')
+plt.yticks(fontsize = 35)
+plt.xlim(1980,2100)
+plt.ylim(0,2.5)
+plt.xlabel('Year', fontsize = 35)
+plt.xticks((1980,1990,2000,2010,2020,2030,2040,2050,2060,2070,2080,2090,2100),['1980','1990', '2000', '2010','2020','2030', '2040', '2050','2060','2070', '2080','2090','2100'],fontsize = 35, rotation = 45)
+plt.ylabel('Yield ton/acre', fontsize = 35)
+plt.plot(np.arange(1980,2021), yield_observed_state[0:41], linewidth = 4, color = 'green')
+tsplot(np.arange(1980,2021), np.transpose(yield_all_hist_rcp45[0:41]) , color = 'grey')
+plt.plot(np.arange(1980,2021), np.median(yield_all_hist_rcp45, axis=1), color = 'black', linewidth = 4)
+first_legend = plt.legend(handles=[Line2D([0], [0], color='green', lw=4, label='Observed yield'),grey_patch], fontsize = 30,fancybox=False, shadow=False, ncol = 1, bbox_to_anchor=(1, -0.3), edgecolor = 'white')
+plt.gca().add_artist(first_legend)
+second_legend = plt.legend(handles=[ blue_patch,red_patch, purple_patch],fontsize = 30,fancybox=False, shadow=False, ncol = 1, bbox_to_anchor=(2, -0.3), edgecolor = 'white')
+plt.gca().add_artist(second_legend)
+font = font_manager.FontProperties(weight='bold', size=30)
+plt.legend(handles=[blank_patch],fontsize = 30,fancybox=False, shadow=False, ncol = 1, bbox_to_anchor=(1.56, -0.2), edgecolor = 'white', prop = font)
+box_legend = np.zeros((17000,5))
+box_legend[:,0] = np.random.normal(2,0.16,size = (17000))
+box_legend[:,1] = box_legend[:,0]
+box_legend[:,2] = box_legend[:,0]
+box_legend[:,3] = box_legend[:,0]
+box_legend[:,4] = box_legend[:,0]
+tsplot(np.array([1985,1986,1987,1988,1989]),box_legend, color = 'royalblue')
+plt.plot(np.array([1985,1986,1987,1988,1989]), np.median(box_legend, axis = 0), linewidth = 4, linestyle = 'solid', color = 'b')
+plt.text(x = 1990,y=1.8, s='67% CI', fontsize = 30)
+plt.text(x = 1990,y=1.65, s='95% CI', fontsize = 30)
+plt.text(x = 1990,y=1.95, s='Median', fontsize = 30)
+plt.subplot(1,2,2)
+plt.title('RCP8.5', fontsize = 35)
+tsplot(t,np.transpose(future_tech_trend_rcp85[41:]), color = 'darkorchid')
+plt.plot(t,np.median(future_tech_trend_rcp85[41:], axis=1), color = 'darkorchid', linewidth = 4)
+tsplot(t, np.transpose(yield_all_future_rcp85), color = 'royalblue')
+plt.plot(t,np.median(yield_all_future_rcp85, axis=1), color = 'b', linestyle = 'solid', linewidth = 4)
+tsplot(t, np.transpose(yield_all_future_rcp85_s), color = 'lightcoral')
+plt.plot(t,np.median(yield_all_future_rcp85_s, axis=1), color = 'r',linestyle = 'solid', linewidth = 4)
+plt.yticks(fontsize = 35)
+plt.xlim(1980,2100)
+plt.xlabel('Year', fontsize = 35)
+plt.xticks((1980,1990,2000,2010,2020,2030,2040,2050,2060,2070,2080,2090,2100),['1980','1990', '2000', '2010','2020','2030', '2040', '2050','2060','2070', '2080','2090','2100'],fontsize = 35, rotation = 45)
+plt.ylabel('Yield ton/acre', fontsize = 35)
+plt.xlim(1980,2100)
+plt.ylim(0,2.5)
+plt.plot(np.arange(1980,2021), yield_observed_state[0:41], linewidth = 4, color = 'green')
+tsplot(np.arange(1980,2021), y = np.transpose(yield_all_hist_rcp85[0:41]) , color = 'grey')
+plt.plot(np.arange(1980,2021), np.median(yield_all_hist_rcp85, axis=1), color = 'black', linewidth = 4)
+plt.subplots_adjust(bottom=0.35)
+plt.savefig('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/Almond_plots/plot_hnrg/almond-land-avg/Growth_stage_ACI_6_19/future_yield_prediction_with_contant_tech_trend.png', dpi = 300)
+plt.show()
+
+
+##var boxplot
+from matplotlib.patches import PathPatch
+
+def adjust_box_widths(g, fac):
+    """
+    Adjust the withs of a seaborn-generated boxplot.
+    """
+
+    # iterating through Axes instances
+    for ax in g.axes:
+
+        # iterating through axes artists:
+        for c in ax.get_children():
+
+            # searching for PathPatches
+            if isinstance(c, PathPatch):
+                # getting current width of box:
+                p = c.get_path()
+                verts = p.vertices
+                verts_sub = verts[:-1]
+                xmin = np.min(verts_sub[:, 0])
+                xmax = np.max(verts_sub[:, 0])
+                xmid = 0.5*(xmin+xmax)
+                xhalf = 0.5*(xmax - xmin)
+
+                # setting new width of box
+                xmin_new = xmid-fac*xhalf
+                xmax_new = xmid+fac*xhalf
+                verts_sub[verts_sub[:, 0] == xmin, 0] = xmin_new
+                verts_sub[verts_sub[:, 0] == xmax, 0] = xmax_new
+
+                # setting new width of median line
+                for l in ax.lines:
+                    if np.all(l.get_xdata() == [xmin, xmax]):
+                        l.set_xdata([xmin_new, xmax_new]) 
+yield_across_state_total_rcp45 = np.row_stack((yield_across_state_hist_rcp45, yield_across_state_future_rcp45))
+yield_across_state_total_rcp45_s = np.row_stack((yield_across_state_hist_rcp45_s, yield_across_state_future_rcp45_s))
+yield_across_state_total_rcp85 = np.row_stack((yield_across_state_hist_rcp85, yield_across_state_future_rcp85))
+yield_across_state_total_rcp85_s = np.row_stack((yield_across_state_hist_rcp85_s, yield_across_state_future_rcp85_s))
+
+yield_average_model_total_rcp45 = np.row_stack((yield_average_model_hist_rcp45, yield_average_model_future_rcp45))
+yield_average_model_total_rcp45_s = np.row_stack((yield_average_model_hist_rcp45_s, yield_average_model_future_rcp45_s))
+yield_average_model_total_rcp85 = np.row_stack((yield_average_model_hist_rcp85, yield_average_model_future_rcp85))
+yield_average_model_total_rcp85_s = np.row_stack((yield_average_model_hist_rcp85, yield_average_model_future_rcp85_s))
+
+yield_all_sum_rcp45 = np.row_stack((yield_all_hist_rcp45, yield_all_future_rcp45))
+yield_all_sum_rcp45_s = np.row_stack((yield_all_hist_rcp45_s, yield_all_future_rcp45_s))
+yield_all_sum_rcp85 = np.row_stack((yield_all_hist_rcp85, yield_all_future_rcp85))
+yield_all_sum_rcp85_s = np.row_stack((yield_all_hist_rcp85_s, yield_all_future_rcp85_s))
+
+
+yield_change_2000 = np.zeros((17,4))
+yield_change_2050 = np.zeros((17,4))
+yield_change_2099 = np.zeros((17,4))
+
+yield_change_2000[:,0] = (np.nanmean(yield_across_state_total_rcp45[20:41,:],axis = 0))
+yield_change_2000[:,1] = (np.nanmean(yield_across_state_total_rcp45_s[20:41], axis = 0))
+yield_change_2000[:,2] = (np.nanmean(yield_across_state_total_rcp85[20:41], axis= 0))
+yield_change_2000[:,3] = (np.nanmean(yield_across_state_total_rcp85_s[20:41], axis= 0 ))
+
+yield_change_2050[:,0] = ((np.nanmean(yield_across_state_total_rcp45[60:81,:],axis = 0))-yield_change_2000[:,0])*100/yield_change_2000[:,0]
+yield_change_2050[:,1] = ((np.nanmean(yield_across_state_total_rcp45_s[60:81,:], axis = 0))-yield_change_2000[:,1])*100/yield_change_2000[:,1]
+yield_change_2050[:,2] = ((np.nanmean(yield_across_state_total_rcp85[60:81,:], axis= 0))-yield_change_2000[:,2])*100/yield_change_2000[:,2]
+yield_change_2050[:,3] = ((np.nanmean(yield_across_state_total_rcp85_s[60:81,:], axis= 0 ))-yield_change_2000[:,3])*100/yield_change_2000[:,3]
+
+yield_change_2099[:,0] = ((np.nanmean(yield_across_state_total_rcp45[100:120,:],axis = 0))-yield_change_2000[:,0])*100/yield_change_2000[:,0]
+yield_change_2099[:,1] = ((np.nanmean(yield_across_state_total_rcp45_s[100:120,:], axis = 0))-yield_change_2000[:,1])*100/yield_change_2000[:,1]
+yield_change_2099[:,2] = ((np.nanmean(yield_across_state_total_rcp85[100:120,:], axis= 0))-yield_change_2000[:,2])*100/yield_change_2000[:,2]
+yield_change_2099[:,3] = ((np.nanmean(yield_across_state_total_rcp85_s[100:120,:], axis= 0))-yield_change_2000[:,3])*100/yield_change_2000[:,3]
+
+yield_change_2000_ave_model = np.zeros((1000,4))
+yield_change_2050_ave_model = np.zeros((1000,4))
+yield_change_2099_ave_model = np.zeros((1000,4))
+
+yield_change_2000_ave_model[:,0] = (np.nanmean(yield_average_model_total_rcp45[20:41,:],axis = 0))
+yield_change_2000_ave_model[:,1] = (np.nanmean(yield_average_model_total_rcp45_s[20:41], axis = 0))
+yield_change_2000_ave_model[:,2] = (np.nanmean(yield_average_model_total_rcp85[20:41], axis= 0))
+yield_change_2000_ave_model[:,3] = (np.nanmean(yield_average_model_total_rcp85_s[20:41], axis= 0 ))
+
+yield_change_2050_ave_model[:,0] = ((np.nanmean(yield_average_model_total_rcp45[60:81,:],axis = 0))-yield_change_2000_ave_model[:,0])*100/yield_change_2000_ave_model[:,0]
+yield_change_2050_ave_model[:,1] = ((np.nanmean(yield_average_model_total_rcp45_s[60:81,:], axis = 0))-yield_change_2000_ave_model[:,1])*100/yield_change_2000_ave_model[:,1]
+yield_change_2050_ave_model[:,2] = ((np.nanmean(yield_average_model_total_rcp85[60:81,:], axis= 0))-yield_change_2000_ave_model[:,2])*100/yield_change_2000_ave_model[:,2]
+yield_change_2050_ave_model[:,3] = ((np.nanmean(yield_average_model_total_rcp85_s[60:81,:], axis= 0 ))-yield_change_2000_ave_model[:,3])*100/yield_change_2000_ave_model[:,3]
+
+yield_change_2099_ave_model[:,0] = ((np.nanmean(yield_average_model_total_rcp45[100:120,:],axis = 0))-yield_change_2000_ave_model[:,0])*100/yield_change_2000_ave_model[:,0]
+yield_change_2099_ave_model[:,1] = ((np.nanmean(yield_average_model_total_rcp45_s[100:120,:], axis = 0))-yield_change_2000_ave_model[:,1])*100/yield_change_2000_ave_model[:,1]
+yield_change_2099_ave_model[:,2] = ((np.nanmean(yield_average_model_total_rcp85[100:120,:], axis= 0))-yield_change_2000_ave_model[:,2])*100/yield_change_2000_ave_model[:,2]
+yield_change_2099_ave_model[:,3] = ((np.nanmean(yield_average_model_total_rcp85_s[100:120,:], axis= 0))-yield_change_2000_ave_model[:,3])*100/yield_change_2000_ave_model[:,3]
+
+yield_change_all_2000 = np.zeros((17000,4))
+yield_change_all_2050 = np.zeros((17000,4))
+yield_change_all_2099 = np.zeros((17000,4))
+
+yield_change_all_2000[:,0] = (np.nanmean(yield_all_sum_rcp45[20:41,:],axis = 0))
+yield_change_all_2000[:,1] = (np.nanmean(yield_all_sum_rcp45_s[20:41], axis = 0))
+yield_change_all_2000[:,2] = (np.nanmean(yield_all_sum_rcp85[20:41], axis= 0))
+yield_change_all_2000[:,3] = (np.nanmean(yield_all_sum_rcp85_s[20:41], axis= 0 ))
+
+yield_change_all_2050[:,0] = ((np.nanmean(yield_all_sum_rcp45[60:81,:],axis = 0))-yield_change_all_2000[:,0])*100/yield_change_all_2000[:,0]
+yield_change_all_2050[:,1] = ((np.nanmean(yield_all_sum_rcp45_s[60:81,:], axis = 0))-yield_change_all_2000[:,1])*100/yield_change_all_2000[:,1]
+yield_change_all_2050[:,2] = ((np.nanmean(yield_all_sum_rcp85[60:81,:], axis= 0))-yield_change_all_2000[:,2])*100/yield_change_all_2000[:,2]
+yield_change_all_2050[:,3] = ((np.nanmean(yield_all_sum_rcp85_s[60:81,:], axis= 0 ))-yield_change_all_2000[:,3])*100/yield_change_all_2000[:,3]
+
+yield_change_all_2099[:,0] = ((np.nanmean(yield_all_sum_rcp45[100:120,:],axis = 0))-yield_change_all_2000[:,0])*100/yield_change_all_2000[:,0]
+yield_change_all_2099[:,1] = ((np.nanmean(yield_all_sum_rcp45_s[100:120,:], axis = 0))-yield_change_all_2000[:,1])*100/yield_change_all_2000[:,1]
+yield_change_all_2099[:,2] = ((np.nanmean(yield_all_sum_rcp85[100:120,:], axis= 0))-yield_change_all_2000[:,2])*100/yield_change_all_2000[:,2]
+yield_change_all_2099[:,3] = ((np.nanmean(yield_all_sum_rcp85_s[100:120,:], axis= 0))-yield_change_all_2000[:,3])*100/yield_change_all_2000[:,3]
+
+##future tech trend
+tech_trend_change_2000 = np.zeros((1000,2))
+tech_trend_change_2050 = np.zeros((1000,2))
+tech_trend_change_2090 = np.zeros((1000,2))
+tech_trend_change_2000[:,0] = (np.nanmean(future_tech_trend_rcp45[20:41], axis=0))
+tech_trend_change_2000[:,1] = (np.nanmean(future_tech_trend_rcp85[20:41], axis=0))
+tech_trend_change_2050[:,0] =  ((np.nanmean(future_tech_trend_rcp45[60:81,:],axis = 0))-tech_trend_change_2000[:,0])*100/tech_trend_change_2000[:,0]
+tech_trend_change_2050[:,1] =  ((np.nanmean(future_tech_trend_rcp85[60:81,:],axis = 0))-tech_trend_change_2000[:,1])*100/tech_trend_change_2000[:,1]
+tech_trend_change_2090[:,0] =  ((np.nanmean(future_tech_trend_rcp45[100:120,:],axis = 0))-tech_trend_change_2000[:,0])*100/tech_trend_change_2000[:,0]
+tech_trend_change_2090[:,1] =  ((np.nanmean(future_tech_trend_rcp85[100:120,:],axis = 0))-tech_trend_change_2000[:,1])*100/tech_trend_change_2000[:,1]
+
+##natural var
+narutal_var_2050_rcp45 = np.mean(((yield_across_state_total_rcp45[60:81] - yield_across_state_total_rcp45[20:41])*100/yield_across_state_total_rcp45[20:41]), axis = 1)
+narutal_var_2050_rcp45_s = np.mean(((yield_across_state_total_rcp45_s[60:81] - yield_across_state_total_rcp45_s[20:41])*100/yield_across_state_total_rcp45_s[20:41]), axis = 1)
+narutal_var_2050_rcp85 = np.mean(((yield_across_state_total_rcp85[60:81] - yield_across_state_total_rcp85[20:41])*100/yield_across_state_total_rcp85[20:41]), axis = 1)
+narutal_var_2050_rcp85_s = np.mean(((yield_across_state_total_rcp85_s[60:81] - yield_across_state_total_rcp85_s[20:41])*100/yield_across_state_total_rcp85_s[20:41]), axis = 1)
+
+narutal_var_2099_rcp45 = np.mean(((yield_across_state_total_rcp45[99:120] - yield_across_state_total_rcp45[20:41])*100/yield_across_state_total_rcp45[20:41]), axis = 1)
+narutal_var_2099_rcp45_s = np.mean(((yield_across_state_total_rcp45_s[99:120] - yield_across_state_total_rcp45_s[20:41])*100/yield_across_state_total_rcp45_s[20:41]), axis = 1)
+narutal_var_2099_rcp85 = np.mean(((yield_across_state_total_rcp85[99:120] - yield_across_state_total_rcp85[20:41])*100/yield_across_state_total_rcp85[20:41]), axis = 1)
+narutal_var_2099_rcp85_s = np.mean(((yield_across_state_total_rcp85_s[99:120] - yield_across_state_total_rcp85_s[20:41])*100/yield_across_state_total_rcp85_s[20:41]), axis = 1)
+
+## all data
+yield_change_all_20year_2000 = np.zeros((340000,4))
+yield_change_all_20year_2050 = np.zeros((340000,4))
+yield_change_all_20year_2099 = np.zeros((340000,4))
+
+yield_change_all_20year_2000[:,0] = np.ndarray.flatten(yield_all_sum_rcp45[20:40])
+yield_change_all_20year_2000[:,1] = np.ndarray.flatten(yield_all_sum_rcp45_s[20:40])
+yield_change_all_20year_2000[:,2] = np.ndarray.flatten(yield_all_sum_rcp85[20:40])
+yield_change_all_20year_2000[:,3] = np.ndarray.flatten(yield_all_sum_rcp85_s[20:40])
+
+yield_change_all_20year_2050[:,0] = (np.ndarray.flatten(yield_all_sum_rcp45[60:80])-yield_change_all_20year_2000[:,0])*100/yield_change_all_20year_2000[:,0]
+yield_change_all_20year_2050[:,1] = (np.ndarray.flatten(yield_all_sum_rcp45_s[60:80])-yield_change_all_20year_2000[:,1])*100/yield_change_all_20year_2000[:,1]
+yield_change_all_20year_2050[:,2] = (np.ndarray.flatten(yield_all_sum_rcp85[60:80])-yield_change_all_20year_2000[:,2])*100/yield_change_all_20year_2000[:,2]
+yield_change_all_20year_2050[:,3] = (np.ndarray.flatten(yield_all_sum_rcp85_s[60:80])-yield_change_all_20year_2000[:,3])*100/yield_change_all_20year_2000[:,3]
+
+yield_change_all_20year_2099[:,0] = (np.ndarray.flatten(yield_all_sum_rcp45[100:120])-yield_change_all_20year_2000[:,0])*100/yield_change_all_20year_2000[:,0]
+yield_change_all_20year_2099[:,1] = (np.ndarray.flatten(yield_all_sum_rcp45_s[100:120])-yield_change_all_20year_2000[:,1])*100/yield_change_all_20year_2000[:,1]
+yield_change_all_20year_2099[:,2] = (np.ndarray.flatten(yield_all_sum_rcp85[100:120])-yield_change_all_20year_2000[:,2])*100/yield_change_all_20year_2000[:,2]
+yield_change_all_20year_2099[:,3] = (np.ndarray.flatten(yield_all_sum_rcp85_s[100:120])-yield_change_all_20year_2000[:,3])*100/yield_change_all_20year_2000[:,3]
+
+
+
+
+
+a = pd.DataFrame({'Year' : np.repeat('2050', 17), 'scenario' : np.repeat('Climate Var-RCP4.5',17) , 'Yield change %' : yield_change_2050[:,1]})
+b = pd.DataFrame({'Year' : np.repeat('2050', 1000), 'scenario' : np.repeat('Stats. Var-RCP4.5',1000) , 'Yield change %' : yield_change_2050_ave_model[:,1]})
+c = pd.DataFrame({'Year' : np.repeat('2050', 21), 'scenario' : np.repeat('Natural Var-RCP4.5',21) , 'Yield change %' : narutal_var_2050_rcp45_s})
+d = pd.DataFrame({'Year' : np.repeat('2050', 17000), 'scenario' : np.repeat('20yr mean Var-RCP4.5',17000) , 'Yield change %' : yield_change_all_2050[:,1]})
+
+e = pd.DataFrame({'Year' : np.repeat('2050', 17), 'scenario' : np.repeat('Climate Var-RCP8.5',17) , 'Yield change %' : yield_change_2050[:,3]})
+f = pd.DataFrame({'Year' : np.repeat('2050', 1000), 'scenario' : np.repeat('Stats. Var-RCP8.5',1000) , 'Yield change %' : yield_change_2050_ave_model[:,3]})
+g = pd.DataFrame({'Year' : np.repeat('2050', 21), 'scenario' : np.repeat('Natural Var-RCP8.5',21) , 'Yield change %' : narutal_var_2050_rcp85_s})
+h = pd.DataFrame({'Year' : np.repeat('2050', 17000), 'scenario' : np.repeat('20yr mean Var-RCP8.5',17000) , 'Yield change %' : yield_change_all_2050[:,3]})
+
+i = pd.DataFrame({'Year' : np.repeat('2090', 17), 'scenario' : np.repeat('Climate Var-RCP4.5',17) , 'Yield change %' : yield_change_2099[:,1]})
+j = pd.DataFrame({'Year' : np.repeat('2090', 1000), 'scenario' : np.repeat('Stats. Var-RCP4.5',1000) , 'Yield change %' : yield_change_2099_ave_model[:,1]})
+k = pd.DataFrame({'Year' : np.repeat('2090', 21), 'scenario' : np.repeat('Natural Var-RCP4.5',21) , 'Yield change %' : narutal_var_2099_rcp45_s})
+l = pd.DataFrame({'Year' : np.repeat('2090', 17000), 'scenario' : np.repeat('20yr mean Var-RCP4.5',17000) , 'Yield change %' : yield_change_all_2099[:,1]})
+
+m = pd.DataFrame({'Year' : np.repeat('2090', 17), 'scenario' : np.repeat('Climate Var-RCP8.5',17) , 'Yield change %' : yield_change_2099[:,3]})
+n = pd.DataFrame({'Year' : np.repeat('2090', 1000), 'scenario' : np.repeat('Stats. Var-RCP8.5',1000) , 'Yield change %' : yield_change_2099_ave_model[:,3]})
+o = pd.DataFrame({'Year' : np.repeat('2090', 21), 'scenario' : np.repeat('Natural Var-RCP8.5',21) , 'Yield change %' : narutal_var_2099_rcp85_s})
+p = pd.DataFrame({'Year' : np.repeat('2090', 17000), 'scenario' : np.repeat('20yr mean Var-RCP8.5',17000) , 'Yield change %' : yield_change_all_2099[:,3]})
+
+q = pd.DataFrame({'Year' : np.repeat('2050', 340000), 'scenario' : np.repeat('All Data-RCP4.5',340000) , 'Yield change %' : yield_change_all_20year_2050[:,1]})
+r = pd.DataFrame({'Year' : np.repeat('2050', 340000), 'scenario' : np.repeat('All Data-RCP8.5',340000) , 'Yield change %' : yield_change_all_20year_2050[:,3]})
+s = pd.DataFrame({'Year' : np.repeat('2090', 340000), 'scenario' : np.repeat('All Data-RCP4.5',340000) , 'Yield change %' : yield_change_all_20year_2099[:,1]})
+t = pd.DataFrame({'Year' : np.repeat('2090', 340000), 'scenario' : np.repeat('All Data-RCP8.5',340000) , 'Yield change %' : yield_change_all_20year_2099[:,3]})
+
+aa = pd.DataFrame({'Year' : np.repeat('2050', 17), 'scenario' : np.repeat('Climate Var-RCP4.5_t',17) , 'Yield change %' : yield_change_2050[:,0]})
+bb = pd.DataFrame({'Year' : np.repeat('2050', 1000), 'scenario' : np.repeat('Stats. Var-RCP4.5_t',1000) , 'Yield change %' : yield_change_2050_ave_model[:,0]})
+cc = pd.DataFrame({'Year' : np.repeat('2050', 21), 'scenario' : np.repeat('Natural Var-RCP4.5_t',21) , 'Yield change %' : narutal_var_2050_rcp45})
+dd = pd.DataFrame({'Year' : np.repeat('2050', 17000), 'scenario' : np.repeat('20yr mean Var-RCP4.5_t',17000) , 'Yield change %' : yield_change_all_2050[:,0]})
+
+ee = pd.DataFrame({'Year' : np.repeat('2050', 17), 'scenario' : np.repeat('Climate Var-RCP8.5_t',17) , 'Yield change %' : yield_change_2050[:,2]})
+ff = pd.DataFrame({'Year' : np.repeat('2050', 1000), 'scenario' : np.repeat('Stats. Var-RCP8.5_t',1000) , 'Yield change %' : yield_change_2050_ave_model[:,2]})
+gg = pd.DataFrame({'Year' : np.repeat('2050', 21), 'scenario' : np.repeat('Natural Var-RCP8.5_t',21) , 'Yield change %' : narutal_var_2050_rcp85})
+hh = pd.DataFrame({'Year' : np.repeat('2050', 17000), 'scenario' : np.repeat('20yr mean Var-RCP8.5_t',17000) , 'Yield change %' : yield_change_all_2050[:,2]})
+
+ii = pd.DataFrame({'Year' : np.repeat('2090', 17), 'scenario' : np.repeat('Climate Var-RCP4.5_t',17) , 'Yield change %' : yield_change_2099[:,0]})
+jj = pd.DataFrame({'Year' : np.repeat('2090', 1000), 'scenario' : np.repeat('Stats. Var-RCP4.5_t',1000) , 'Yield change %' : yield_change_2099_ave_model[:,0]})
+kk = pd.DataFrame({'Year' : np.repeat('2090', 21), 'scenario' : np.repeat('Natural Var-RCP4.5_t',21) , 'Yield change %' : narutal_var_2099_rcp45})
+ll = pd.DataFrame({'Year' : np.repeat('2090', 17000), 'scenario' : np.repeat('20yr mean Var-RCP4.5_t',17000) , 'Yield change %' : yield_change_all_2099[:,0]})
+
+mm = pd.DataFrame({'Year' : np.repeat('2090', 17), 'scenario' : np.repeat('Climate Var-RCP8.5_t',17) , 'Yield change %' : yield_change_2099[:,2]})
+nn = pd.DataFrame({'Year' : np.repeat('2090', 1000), 'scenario' : np.repeat('Stats. Var-RCP8.5_t',1000) , 'Yield change %' : yield_change_2099_ave_model[:,2]})
+oo = pd.DataFrame({'Year' : np.repeat('2090', 21), 'scenario' : np.repeat('Natural Var-RCP8.5_t',21) , 'Yield change %' : narutal_var_2099_rcp85})
+pp = pd.DataFrame({'Year' : np.repeat('2090', 17000), 'scenario' : np.repeat('20yr mean Var-RCP8.5_t',17000) , 'Yield change %' : yield_change_all_2099[:,2]})
+
+qq = pd.DataFrame({'Year' : np.repeat('2050', 340000), 'scenario' : np.repeat('All Data-RCP4.5_t',340000) , 'Yield change %' : yield_change_all_20year_2050[:,0]})
+rr = pd.DataFrame({'Year' : np.repeat('2050', 340000), 'scenario' : np.repeat('All Data-RCP8.5_t',340000) , 'Yield change %' : yield_change_all_20year_2050[:,2]})
+ss = pd.DataFrame({'Year' : np.repeat('2090', 340000), 'scenario' : np.repeat('All Data-RCP4.5_t',340000) , 'Yield change %' : yield_change_all_20year_2099[:,0]})
+tt = pd.DataFrame({'Year' : np.repeat('2090', 340000), 'scenario' : np.repeat('All Data-RCP8.5_t',340000) , 'Yield change %' : yield_change_all_20year_2099[:,2]})
+
+
+u = pd.DataFrame({'Year' : np.repeat('2050', 1000), 'scenario' : np.repeat('tech_trend-RCP4.5', 1000), 'Yield change %' : tech_trend_change_2050[:,0]})
+uu = pd.DataFrame({'Year' : np.repeat('2050', 1000), 'scenario' : np.repeat('tech_trend-RCP8.5', 1000), 'Yield change %' : tech_trend_change_2050[:,1]})
+v = pd.DataFrame({'Year' : np.repeat('2090', 1000), 'scenario' : np.repeat('tech_trend-RCP4.5', 1000), 'Yield change %' : tech_trend_change_2090[:,0]})
+vv = pd.DataFrame({'Year' : np.repeat('2090', 1000), 'scenario' : np.repeat('tech_trend-RCP8.5', 1000), 'Yield change %' : tech_trend_change_2090[:,1]})
+
+w =  pd.DataFrame({'Year' : np.repeat('2090', 34000), 'scenario' : np.repeat('20yr mean Var-RCP4.5_total',34000) , 'Yield change %' : np.concatenate((yield_change_all_2099[:,0],yield_change_all_2099[:,1]))})
+ww =  pd.DataFrame({'Year' : np.repeat('2090', 34000), 'scenario' : np.repeat('20yr mean Var-RCP8.5_total',34000) , 'Yield change %' : np.concatenate((yield_change_all_2099[:,2],yield_change_all_2099[:,3]))})
+
+
+
+
+df = a.append(aa).append(b).append(bb).append(c).append(cc).append(d).append(dd).append(e).append(ee).append(f).append(ff).append(g).append(gg).append(h).append(hh).append(i).append(ii).append(j).append(jj).append(k).append(kk).append(l).append(ll).append(m).append(mm).append(n).append(nn).append(o).append(oo).append(p).append(pp).append(q).append(qq).append(r).append(rr).append(s).append(ss).append(t).append(tt).append(u).append(uu).append(v).append(vv).append(w).append(ww)
+
+## 2050 2099 one plot
+fig = plt.figure(figsize = (22,11))
+plt.suptitle('Simulated Almond Yield Change in California since 2000', fontsize =35, y = 0.95)
+my_pal = {'Climate Var-RCP4.5' : 'lightgreen', 'Stats. Var-RCP4.5': 'lightskyblue', '20yr mean Var-RCP4.5' : 'lightcoral','Climate Var-RCP8.5' : 'lightgreen', 'Stats. Var-RCP8.5': 'lightskyblue', '20yr mean Var-RCP8.5' : 'lightcoral','Climate Var-RCP4.5_t' : 'lime', 'Stats. Var-RCP4.5_t': 'dodgerblue', '20yr mean Var-RCP4.5_t' : 'red','Climate Var-RCP8.5_t' : 'lime', 'Stats. Var-RCP8.5_t': 'dodgerblue', '20yr mean Var-RCP8.5_t' : 'red'}
+ax = sns.boxplot(x = 'Year', y = 'Yield change %', hue = 'scenario',showfliers = False, palette = my_pal, hue_order = ['Climate Var-RCP4.5','Climate Var-RCP8.5', 'Stats. Var-RCP4.5', 'Stats. Var-RCP8.5','20yr mean Var-RCP4.5' , '20yr mean Var-RCP8.5','Climate Var-RCP4.5_t','Climate Var-RCP8.5_t', 'Stats. Var-RCP4.5_t', 'Stats. Var-RCP8.5_t','20yr mean Var-RCP4.5_t' , '20yr mean Var-RCP8.5_t' ], data = df, linewidth = 2.5)
+ax.set_ylim([-105, 150]) 
+mpl.rcParams['hatch.linewidth'] = 3
+hatches = ['','','//','//','','','//','//','','','//','//','','','//','//','','','//','//','','','//','//','','//','','//','','//','','//','','//','','//','','//']
+for hatch,patch in zip(hatches,ax.patches):
+    patch.set_hatch(hatch)
+adjust_box_widths(fig, 0.8)
+#lightblue_patch = mpatches.Patch(color='lightgreen', label='Climate Var (Data amount: 17)')
+#lightgreen_patch = mpatches.Patch(color='lightskyblue', label='Stats. Var (Data amount: 1000)')
+#lightcoral_patch = mpatches.Patch(color='lightcoral', label='All Data Var (Data amount: 340000)')
+#lightblue_patch = mpatches.Patch(color='lightgreen', label='Climate Var (Data amount: 17)')
+#lightgreen_patch = mpatches.Patch(color='lightskyblue', label='Stats. Var (Data amount: 1000)')
+#lightcoral_patch = mpatches.Patch(color='lightcoral', label='All Data Var (Data amount: 340000)')
+#yellow_patch = mpatches.Patch(color='y', label='Natural Var (Data amount: 20)')
+#purple_patch = mpatches.Patch(color='m', label='20-year mean Var (Data amount: 17000)')
+hatch_patch = mpatches.Patch(facecolor = 'w', hatch = '//',edgecolor = 'k')
+cli_handle = ax.get_legend_handles_labels()[0][0]
+cli_handle_t = ax.get_legend_handles_labels()[0][6]
+sta_handle = ax.get_legend_handles_labels()[0][2]
+sta_handle_t = ax.get_legend_handles_labels()[0][8]
+yr_mean_handle = ax.get_legend_handles_labels()[0][4]
+yr_mean_handle_t = ax.get_legend_handles_labels()[0][10]
+first_legend=plt.legend(handles=[(cli_handle,cli_handle_t),(sta_handle,sta_handle_t), (yr_mean_handle,yr_mean_handle_t),hatch_patch], labels = ['Climate','Statistical', 'Total', 'RCP8.5'], fontsize = 25,loc='upper right', bbox_to_anchor=(0.62, -0.15),
+          fancybox=True, shadow=True, ncol=2,handler_map = {tuple: matplotlib.legend_handler.HandlerTuple(None)},handlelength=5)
+plt.gca().add_artist(first_legend)
+plt.legend(handles=[(cli_handle,sta_handle,yr_mean_handle),(cli_handle_t,sta_handle_t,yr_mean_handle_t)], labels = ['w/ tech-trending','w/o tech-trending'], fontsize = 25,loc='upper left', bbox_to_anchor=(0.65, -0.15),
+          fancybox=True, shadow=True, ncol=1,handler_map = {tuple: matplotlib.legend_handler.HandlerTuple(None)},handlelength=5)
+plt.axvline(x = 0, linestyle='--', color = 'k')
+plt.axvline(x = 1, linestyle='--', color = 'k')
+plt.axhline(y = 0, linestyle = ':', color= 'r')
+plt.xlabel('Year', fontsize = 35)
+plt.ylabel('Yield Change %', fontsize = 35)
+plt.xticks(fontsize = 35)
+plt.yticks(fontsize = 35)
+plt.subplots_adjust(bottom=0.22)
+plt.savefig('/Users/0shqwu/Library/CloudStorage/Box-Box/UCDGlobalChange/shqwu/Almond_plots/plot_hnrg/Yield_change_sum.png', dpi = 200)
+
+## 2090 4 plots
+fig = plt.figure(figsize = (22,11))
+plt.suptitle('Simulated Almond Yield Change in California by the End of Century', fontsize =35, y = 0.95)
+plt.subplot(1,4,1)
+ax1 = sns.boxplot(x = 'Year', y = 'Yield change %', hue = 'scenario',showfliers = False, palette = my_pal, hue_order = ['Climate Var-RCP4.5_t','Stats. Var-RCP4.5_t', '20yr mean Var-RCP4.5_t' ], data = df.loc[df['Year'] == '2090'], linewidth = 2.5)
+ax1.legend([],[], frameon=False)
+ax1.set(xlabel = None)
+plt.ylim(-110,150)
+plt.yticks(fontsize = 35)
+ax1.set_ylabel('Yield Change %', fontsize = 35)
+ax1.set_xlabel('RCP 4.5 w/ Tech', fontsize = 30)
+plt.tick_params(axis = 'x', left = False, right = False , labelleft = False ,labelbottom = False, bottom = False)
+ax1.yaxis.set_minor_locator(AutoMinorLocator())
+ax1.tick_params(axis = 'y', which='major', length=8, direction = 'in')
+ax1.tick_params(which='minor', bottom=False, length = 4,direction = 'in')
+plt.subplot(1,4,2)
+ax2 = sns.boxplot(x = 'Year', y = 'Yield change %', hue = 'scenario',showfliers = False, palette = my_pal, hue_order = ['Climate Var-RCP8.5_t','Stats. Var-RCP8.5_t', '20yr mean Var-RCP8.5_t' ], data = df.loc[df['Year'] == '2090'], linewidth = 2.5)
+ax2.yaxis.set_minor_locator(AutoMinorLocator())
+plt.tick_params(axis = 'x', left = False, right = False , labelleft = False ,labelbottom = False, bottom = False)
+ax2.tick_params(axis = 'y', which='major', length=8, direction = 'in')
+ax2.tick_params(which='minor', bottom=False, length = 4,direction = 'in')
+ax2.axes.yaxis.set_ticklabels([])
+plt.ylim(-110,150)
+ax2.set(xlabel = None, ylabel = None)
+ax2.legend([],[], frameon=False)
+ax2.set_xlabel('RCP 8.5 w/ Tech', fontsize = 30)
+hatches = [ '//','//','//','//','//','//']
+for hatch,patch in zip(hatches,ax2.patches):
+    patch.set_hatch(hatch)
+plt.subplot(1,4,3)
+ax3 =  sns.boxplot(x = 'Year', y = 'Yield change %', hue = 'scenario',showfliers = False, palette = my_pal, hue_order = ['Climate Var-RCP4.5','Stats. Var-RCP4.5', '20yr mean Var-RCP4.5' ], data = df.loc[df['Year'] == '2090'], linewidth = 2.5)
+ax3.yaxis.set_minor_locator(AutoMinorLocator())
+plt.tick_params(axis = 'x', left = False, right = False , labelleft = False ,labelbottom = False, bottom = False)
+plt.tick_params(axis = 'y', which='major', length=8, direction = 'in')
+ax3.tick_params(which='minor', bottom=False, length = 4,direction = 'in')
+ax3.axes.yaxis.set_ticklabels([])
+plt.ylim(-110,150)
+ax3.set(xlabel = None, ylabel = None)
+ax3.legend([],[], frameon=False)
+ax3.set_xlabel('RCP 4.5 w/o Tech', fontsize = 30)
+plt.subplot(1,4,4)
+ax4 =  sns.boxplot(x = 'Year', y = 'Yield change %', hue = 'scenario',showfliers = False, palette = my_pal, hue_order = ['Climate Var-RCP8.5','Stats. Var-RCP8.5', '20yr mean Var-RCP8.5' ], data = df.loc[df['Year'] == '2090'], linewidth = 2.5)
+ax4.yaxis.set_minor_locator(AutoMinorLocator())
+plt.tick_params(axis = 'x', left = False, right = False , labelleft = False ,labelbottom = False, bottom = False)
+plt.tick_params(axis = 'y', which='major', length=8, direction = 'in')
+ax4.tick_params(which='minor', bottom=False, length = 4,direction = 'in')
+ax4.axes.yaxis.set_ticklabels([])
+plt.ylim(-110,150)
+ax4.set(xlabel = None, ylabel = None)
+ax4.set_xlabel('RCP 8.5 w/o Tech', fontsize = 30)
+for hatch,patch in zip(hatches,ax4.patches):
+    patch.set_hatch(hatch)
+hatch_patch = mpatches.Patch(facecolor = 'w', hatch = '//',edgecolor = 'k')
+cli_handle = ax1.get_legend_handles_labels()[0][0]
+cli_handle_t = ax3.get_legend_handles_labels()[0][0]
+sta_handle = ax1.get_legend_handles_labels()[0][1]
+sta_handle_t = ax3.get_legend_handles_labels()[0][1]
+yr_mean_handle = ax1.get_legend_handles_labels()[0][2]
+yr_mean_handle_t = ax3.get_legend_handles_labels()[0][2]
+first_legend=plt.legend(handles=[(cli_handle,cli_handle_t),(sta_handle,sta_handle_t), (yr_mean_handle,yr_mean_handle_t),hatch_patch], labels = ['Climate','Statistical', 'Total', 'RCP8.5'], fontsize = 30,bbox_to_anchor=(-1, -0.05),
+          fancybox=False, shadow=False, ncol=2,handler_map = {tuple: matplotlib.legend_handler.HandlerTuple(None)},handlelength=4)
+plt.gca().add_artist(first_legend)
+plt.legend(handles=[(cli_handle,sta_handle,yr_mean_handle),(cli_handle_t,sta_handle_t,yr_mean_handle_t)], labels = ['w tech-trending','w/o tech-trending'], fontsize = 30, bbox_to_anchor=(0.9, -0.05),
+          fancybox=False, shadow=False, ncol=1,handler_map = {tuple: matplotlib.legend_handler.HandlerTuple(None)},handlelength=5)
+plt.subplots_adjust(bottom=0.22)
+plt.savefig('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/Almond_plots/plot_hnrg/almond-land-avg/Growth_stage_ACI_6_19/Yield_change_sum_four_panel_2090.png', dpi=200)
+
+
+fig = plt.figure(figsize = (22,11))
+plt.suptitle('Simulated Almond Yield Change in California by the Mid of Century', fontsize =35, y = 0.95)
+plt.subplot(1,4,1)
+ax1 = sns.boxplot(x = 'Year', y = 'Yield change %', hue = 'scenario',showfliers = False, palette = my_pal, hue_order = ['Climate Var-RCP4.5_t','Stats. Var-RCP4.5_t', '20yr mean Var-RCP4.5_t' ], data = df.loc[df['Year'] == '2050'], linewidth = 2.5)
+ax1.legend([],[], frameon=False)
+ax1.set(xlabel = None)
+plt.ylim(-40,80)
+plt.yticks(fontsize = 35)
+ax1.set_ylabel('Yield Change %', fontsize = 35)
+ax1.set_xlabel('RCP 4.5 w/ Tech', fontsize = 30)
+plt.tick_params(axis = 'x', left = False, right = False , labelleft = False ,labelbottom = False, bottom = False)
+ax1.yaxis.set_minor_locator(AutoMinorLocator())
+ax1.tick_params(axis = 'y', which='major', length=8, direction = 'in')
+ax1.tick_params(which='minor', bottom=False, length = 4,direction = 'in')
+plt.subplot(1,4,2)
+ax2 = sns.boxplot(x = 'Year', y = 'Yield change %', hue = 'scenario',showfliers = False, palette = my_pal, hue_order = ['Climate Var-RCP8.5_t','Stats. Var-RCP8.5_t', '20yr mean Var-RCP8.5_t' ], data = df.loc[df['Year'] == '2050'], linewidth = 2.5)
+plt.ylim(-40,80)
+ax2.yaxis.set_minor_locator(AutoMinorLocator())
+plt.tick_params(axis = 'x', left = False, right = False , labelleft = False ,labelbottom = False, bottom = False)
+ax2.tick_params(axis = 'y', which='major', length=8, direction = 'in')
+ax2.tick_params(which='minor', bottom=False, length = 4,direction = 'in')
+ax2.axes.yaxis.set_ticklabels([])
+ax2.set(xlabel = None, ylabel = None)
+ax2.legend([],[], frameon=False)
+ax2.set_xlabel('RCP 8.5 w/ Tech', fontsize = 30)
+hatches = [ '//','//','//','//','//','//']
+for hatch,patch in zip(hatches,ax2.patches):
+    patch.set_hatch(hatch)
+plt.subplot(1,4,3)
+ax3 =  sns.boxplot(x = 'Year', y = 'Yield change %', hue = 'scenario',showfliers = False, palette = my_pal, hue_order = ['Climate Var-RCP4.5','Stats. Var-RCP4.5', '20yr mean Var-RCP4.5' ], data = df.loc[df['Year'] == '2050'], linewidth = 2.5)
+plt.ylim(-50,100)
+ax3.yaxis.set_minor_locator(AutoMinorLocator())
+plt.tick_params(axis = 'x', left = False, right = False , labelleft = False ,labelbottom = False, bottom = False)
+ax3.tick_params(axis = 'y', which='major', length=8, direction = 'in')
+ax3.tick_params(which='minor', bottom=False, length = 4,direction = 'in')
+ax3.axes.yaxis.set_ticklabels([])
+ax3.set(xlabel = None, ylabel = None)
+ax3.legend([],[], frameon=False)
+ax3.set_xlabel('RCP 4.5 w/o Tech', fontsize = 30)
+plt.subplot(1,4,4)
+ax4 =  sns.boxplot(x = 'Year', y = 'Yield change %', hue = 'scenario',showfliers = False, palette = my_pal, hue_order = ['Climate Var-RCP8.5','Stats. Var-RCP8.5', '20yr mean Var-RCP8.5' ], data = df.loc[df['Year'] == '2050'], linewidth = 2.5)
+plt.ylim(-50,100)
+ax4.yaxis.set_minor_locator(AutoMinorLocator())
+plt.tick_params(axis = 'x', left = False, right = False , labelleft = False ,labelbottom = False, bottom = False)
+ax4.tick_params(axis = 'y', which='major', length=8, direction = 'in')
+ax4.tick_params(which='minor', bottom=False, length = 4,direction = 'in')
+ax4.axes.yaxis.set_ticklabels([])
+ax4.set(xlabel = None, ylabel = None)
+ax4.set_xlabel('RCP 8.5 w/o Tech', fontsize = 30)
+for hatch,patch in zip(hatches,ax4.patches):
+    patch.set_hatch(hatch)
+hatch_patch = mpatches.Patch(facecolor = 'w', hatch = '//',edgecolor = 'k')
+cli_handle = ax1.get_legend_handles_labels()[0][0]
+cli_handle_t = ax3.get_legend_handles_labels()[0][0]
+sta_handle = ax1.get_legend_handles_labels()[0][1]
+sta_handle_t = ax3.get_legend_handles_labels()[0][1]
+yr_mean_handle = ax1.get_legend_handles_labels()[0][2]
+yr_mean_handle_t = ax3.get_legend_handles_labels()[0][2]
+first_legend=plt.legend(handles=[(cli_handle,cli_handle_t),(sta_handle,sta_handle_t), (yr_mean_handle,yr_mean_handle_t),hatch_patch], labels = ['Climate','Statistical', 'Total', 'RCP8.5'], fontsize = 30,bbox_to_anchor=(-1, -0.05),
+          fancybox=False, shadow=False, ncol=2,handler_map = {tuple: matplotlib.legend_handler.HandlerTuple(None)},handlelength=4)
+plt.gca().add_artist(first_legend)
+plt.legend(handles=[(cli_handle,sta_handle,yr_mean_handle),(cli_handle_t,sta_handle_t,yr_mean_handle_t)], labels = ['w/ tech-trending','w/o tech-trending'], fontsize = 30, bbox_to_anchor=(0.9, -0.05),
+          fancybox=False, shadow=False, ncol=1,handler_map = {tuple: matplotlib.legend_handler.HandlerTuple(None)},handlelength=5)
+plt.subplots_adjust(bottom=0.22)
+plt.savefig('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/Almond_plots/plot_hnrg/almond-land-avg/Growth_stage_ACI_6_19/Yield_change_sum_four_panel_2050.png', dpi=200)
+
+
+##single plot for rcp 4.5 and 8.5
+my_pal = {'Climate Var-RCP4.5' : 'lime', 'Climate Var-RCP8.5' : 'lime','Stats. Var-RCP4.5': 'dodgerblue','Stats. Var-RCP8.5': 'dodgerblue','tech_trend-RCP4.5' : 'darkorchid','tech_trend-RCP8.5' : 'darkorchid'}
+plt.figure(figsize = (30,20))
+plt.subplot(1,2,1)
+ax2 = sns.boxplot(x = 'Year', y = 'Yield change %', hue = 'scenario', showfliers = False, palette = my_pal,  hue_order = ['Climate Var-RCP4.5','Climate Var-RCP8.5', 'Stats. Var-RCP4.5','Stats. Var-RCP8.5', 'tech_trend-RCP4.5','tech_trend-RCP8.5'],linewidth =4,data = df.loc[df['Year'] == '2050'])
+ax2.legend([],[], frameon=False)
+ax2.set(xlabel = None)
+plt.tick_params(axis = 'x', left = False, right = False , labelleft = False ,labelbottom = False, bottom = False)
+ax2.set_xlabel('2050', fontsize = 35)
+ax2.yaxis.set_minor_locator(AutoMinorLocator())
+ax2.tick_params(axis = 'y', which='major', length=14, direction = 'in')
+ax2.tick_params(which='minor', bottom=False, length = 8,direction = 'in')
+plt.yticks(fontsize = 35)
+ax2.set_ylabel('Yield Change %', fontsize = 35)
+plt.ylim(-100,150)
+hatches = [ '','','//','//','','','//','//','','','//','//']
+for hatch,patch in zip(hatches,ax2.patches):
+    patch.set_hatch(hatch)
+plt.subplot(1,2,2)
+ax1 = sns.boxplot(x = 'Year', y = 'Yield change %', hue = 'scenario', showfliers = False, palette = my_pal,  hue_order = ['Climate Var-RCP4.5','Climate Var-RCP8.5', 'Stats. Var-RCP4.5','Stats. Var-RCP8.5', 'tech_trend-RCP4.5','tech_trend-RCP8.5'],linewidth =4,data = df.loc[df['Year'] == '2090'])
+ax1.legend([],[], frameon=False)
+ax1.set(xlabel = None)
+plt.tick_params(axis = 'x', left = False, right = False , labelleft = False ,labelbottom = False, bottom = False)
+ax1.set_xlabel('2090', fontsize = 35)
+ax1.yaxis.set_minor_locator(AutoMinorLocator())
+ax1.tick_params(axis = 'y', which='major', length=14, direction = 'in')
+ax1.tick_params(which='minor', bottom=False, length = 8,direction = 'in')
+plt.yticks(fontsize = 35)
+ax1.set_ylabel('', fontsize = 35)
+plt.ylim(-100,150)
+hatches = [ '','','//','//','','','//','//','','','//','//']
+for hatch,patch in zip(hatches,ax1.patches):
+    patch.set_hatch(hatch)
+cli_handle = ax1.get_legend_handles_labels()[0][0]
+sta_handle = ax1.get_legend_handles_labels()[0][2]
+tech_handle = ax1.get_legend_handles_labels()[0][4]
+hatch_patch = mpatches.Patch(facecolor = 'w', hatch = '//',edgecolor = 'k')
+plt.legend(handles=[cli_handle,sta_handle,tech_handle,hatch_patch], labels = ['Climate','Statistical', 'Tech', 'RCP8.5'], fontsize = 30,bbox_to_anchor=(0.65, -0.05),
+          fancybox=False, shadow=False, ncol=4,handler_map = {tuple: matplotlib.legend_handler.HandlerTuple(None)},handlelength=3)
+plt.savefig('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/Almond_plots/plot_hnrg/almond-land-avg/Growth_stage_ACI_6_19/Yield_change_sum_2_panel.png', dpi=200)
+
+
+
+##waterfall plot
+aci_contribution_rcp45_total = np.load('C:/Users/Pancake/Box/aci_contribution_6_19/aci_contribution_rcp45_total.npy')
+aci_contribution_rcp85_total = np.load('C:/Users/Pancake/Box/aci_contribution_6_19/aci_contribution_rcp85_total.npy')
+
+aci_contribution_rcp45_1901_2020 = np.mean(aci_contribution_rcp45_total[21:41,:,:], axis=0)
+aci_contribution_rcp85_1901_2020 = np.mean(aci_contribution_rcp85_total[21:41,:,:], axis=0)
+
+aci_contribution_rcp45_2041_2060 = np.mean(aci_contribution_rcp45_total[61:81,:,:], axis=0)
+aci_contribution_rcp85_2041_2060 = np.mean(aci_contribution_rcp85_total[61:81,:,:], axis=0)
+
+aci_contribution_rcp45_1980_2099 = np.mean(aci_contribution_rcp45_total[100:120,:,:], axis=0)
+aci_contribution_rcp85_1980_2099 = np.mean(aci_contribution_rcp85_total[100:120,:,:], axis=0)
+
+aci_contribution_rcp45_change_percent_2041_2060 = np.zeros((1000,aci_num))
+aci_contribution_rcp85_change_percent_2041_2060 = np.zeros((1000,aci_num))
+aci_contribution_rcp45_change_percent_2080_2099 = np.zeros((1000,aci_num))
+aci_contribution_rcp85_change_percent_2080_2099 = np.zeros((1000,aci_num))
+
+aci_contribution_rcp45_change_total_2041_2060 = np.zeros((1000))
+aci_contribution_rcp85_change_total_2041_2060 = np.zeros((1000))
+aci_contribution_rcp45_change_total_2080_2099 = np.zeros((1000))
+aci_contribution_rcp85_change_total_2080_2099 = np.zeros((1000))
+for i in range(0,1000):
+    aci_contribution_rcp45_change_total_2041_2060[i] = np.sum(aci_contribution_rcp45_2041_2060[i,:])-np.sum(aci_contribution_rcp45_1901_2020[i,:])
+    aci_contribution_rcp85_change_total_2041_2060[i] = np.sum(aci_contribution_rcp85_2041_2060[i,:])-np.sum(aci_contribution_rcp85_1901_2020[i,:])
+    aci_contribution_rcp45_change_total_2080_2099[i] = np.sum(aci_contribution_rcp45_1980_2099[i,:])-np.sum(aci_contribution_rcp45_1901_2020[i,:])
+    aci_contribution_rcp85_change_total_2080_2099[i] = np.sum(aci_contribution_rcp85_1980_2099[i,:])-np.sum(aci_contribution_rcp85_1901_2020[i,:])
+    aci_contribution_rcp45_change_percent_2041_2060[i,:] = 100*(aci_contribution_rcp45_2041_2060[i,:]-aci_contribution_rcp45_1901_2020[i,:])/np.absolute(aci_contribution_rcp45_change_total_2041_2060[i])
+    aci_contribution_rcp85_change_percent_2041_2060[i,:] = 100*(aci_contribution_rcp85_2041_2060[i,:]-aci_contribution_rcp85_1901_2020[i,:])/np.absolute(aci_contribution_rcp85_change_total_2041_2060[i])
+    aci_contribution_rcp45_change_percent_2080_2099[i,:] = 100*(aci_contribution_rcp45_1980_2099[i,:]-aci_contribution_rcp45_1901_2020[i,:])/np.absolute(aci_contribution_rcp45_change_total_2080_2099[i])
+    aci_contribution_rcp85_change_percent_2080_2099[i,:] = 100*(aci_contribution_rcp85_1980_2099[i,:]-aci_contribution_rcp85_1901_2020[i,:])/np.absolute(aci_contribution_rcp85_change_total_2080_2099[i])
+
+
+median_rcp45_2041_2060 = np.nanmedian(aci_contribution_rcp45_change_percent_2041_2060, axis=0)
+median_rcp85_2041_2060 = np.nanmedian(aci_contribution_rcp85_change_percent_2041_2060, axis=0)
+median_rcp45_2080_2099 = np.nanmedian(aci_contribution_rcp45_change_percent_2080_2099, axis=0)
+median_rcp85_2080_2099 = np.nanmedian(aci_contribution_rcp85_change_percent_2080_2099, axis=0)
+
+aci_contribution_rcp45_county_2050_change_percent = np.load('C:/Users/Pancake/Box/aci_contribution_6_19/aci_contribution_rcp45_county_2050_change_percent.npy')
+aci_contribution_rcp45_county_2090_change_percent = np.load('C:/Users/Pancake/Box/aci_contribution_6_19/aci_contribution_rcp45_county_2090_change_percent.npy')
+aci_contribution_rcp85_county_2050_change_percent = np.load('C:/Users/Pancake/Box/aci_contribution_6_19/aci_contribution_rcp85_county_2050_change_percent.npy')
+aci_contribution_rcp85_county_2090_change_percent = np.load('C:/Users/Pancake/Box/aci_contribution_6_19/aci_contribution_rcp85_county_2090_change_percent.npy')
+
+aci_contribution_rcp45_county_2050_change_percent_median = np.median(aci_contribution_rcp45_county_2050_change_percent, axis=1)
+aci_contribution_rcp45_county_2090_change_percent_median = np.median(aci_contribution_rcp45_county_2090_change_percent, axis=1)
+aci_contribution_rcp85_county_2050_change_percent_median = np.median(aci_contribution_rcp85_county_2050_change_percent, axis=1)
+aci_contribution_rcp85_county_2090_change_percent_median = np.median(aci_contribution_rcp85_county_2090_change_percent, axis=1)
+
+fig, axs = plt.subplots(17,1,figsize=(30,60), gridspec_kw={'height_ratios': [8,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]})
+formatting = "{:,.1f}"
+from matplotlib.ticker import FuncFormatter
+index = np.array(ACI_list)[:]
+data = median_rcp45_2080_2099
+aci_delete_index = np.where(data == 0)
+index = np.delete(index, aci_delete_index)
+data = np.delete(data, aci_delete_index)
+index=np.array(index)
+data=np.array(data)
+changes = {'amount' : data}
+def money(x, pos):
+    return formatting.format(x)
+formatter = FuncFormatter(money)    
+trans = pd.DataFrame(data=changes,index=index)
+blank = trans.amount.cumsum().shift(1).fillna(0)
+trans['positive'] = trans['amount'] > 0
+total = trans.sum().amount
+#trans.loc['net']= total
+#blank.loc['net'] = total
+step = blank.reset_index(drop=True).repeat(3).shift(-1)
+step[1::3] = np.nan
+#blank.loc['net'] = 0
+trans.loc[trans['positive'] > 1, 'positive'] = 99
+trans.loc[trans['positive'] < 0, 'positive'] = 99
+trans.loc[(trans['positive'] > 0) & (trans['positive'] < 1), 'positive'] = 99
+trans['color'] = trans['positive']
+trans.loc[trans['positive'] == 1, 'color'] = '#29EA38' #green_color
+trans.loc[trans['positive'] == 0, 'color'] = '#FB3C62' #red_color
+trans.loc[trans['positive'] == 99, 'color'] = '#24CAFF' #blue_color
+my_colors = list(trans.color)
+#my_plot = plt.bar(np.arange(0,len(trans.index))-0.5, blank, width=0.4, color='black')
+plt.subplot(17,1,1)
+axs[0].bar(np.arange(0,len(trans.index)), trans.amount, width=0.6, edgecolor = 'black',linewidth = 2,
+         bottom=blank, color=my_colors)       
+plt.plot(step.index, step.values, 'k', linewidth = 2)
+plt.yticks(fontsize = 35)
+plt.ylim(-120,10)
+plt.title('% of ACI Contribution to Yield Change by End of the Century under RCP4.5', fontsize = 35, y =1.05)
+y_height = trans.amount.cumsum().shift(1).fillna(0)
+temp = list(trans.amount) 
+for i in range(len(temp)):
+    if (i > 0) & (i < (len(temp) - 1)):
+        temp[i] = temp[i] + temp[i-1]
+
+trans['temp'] = temp
+        
+plot_max = trans['temp'].max()
+plot_min = trans['temp'].min()
+
+if all(i >= 0 for i in temp):
+    plot_min = 0
+if all(i < 0 for i in temp):
+    plot_max = 0
+
+if abs(plot_max) >= abs(plot_min):
+    maxmax = abs(plot_max)   
+else:
+    maxmax = abs(plot_min)
+    
+pos_offset = maxmax / 40
+
+plot_offset = maxmax / 15 
+loop = 0
+for index, row in trans.iterrows():
+    if row['amount'] == total:
+        y = y_height[loop]
+    else:
+        y = y_height[loop] + row['amount']
+    if row['amount'] > 0:
+        y += (pos_offset*2)
+        plt.annotate(formatting.format(row['amount']),(loop,y-2),ha="center", color = 'g', fontsize=25)
+    else:
+        y -= (pos_offset*4)
+        plt.annotate(formatting.format(row['amount']),(loop,y+3),ha="center", color = 'r', fontsize=25)
+    loop+=1
+#plt.xticks(np.arange(0,len(trans)), trans.index, rotation = 90, fontsize = 30)
+plt.axhline(0, color='black', linewidth = 0.6, linestyle="dashed")
+for i in (0,2,4,6,8,10,12):
+    rect=mpatches.Rectangle([-0.5+i,-120], 1, 130, ec='white', fc='grey', alpha=0.2, clip_on=False)
+    axs[0].add_patch(rect)
+plt.tick_params(axis = 'x' , which = 'both', bottom = False, top = False, labelbottom = False)
+#for i in (0,2,4,6,8,10):
+ #   rect=mpatches.Rectangle([-0.5+i,-120], 1, 150, ec='white', fc='grey', alpha=0.2, clip_on=False)
+  #  ax.add_patch(rect)
+#plt.annotate('', xy = (0.055, -0.4), xycoords = 'axes fraction', xytext = (0.24,-0.4), arrowprops = dict(arrowstyle = '<|-|>, head_width = 2, head_length = 2', linewidth = 5, color = 'k'))
+#plt.annotate('Dormancy', xy = (0.095, -0.5), xycoords = 'axes fraction', fontsize = 35)
+#plt.annotate('', xy = (0.295, -0.4), xycoords = 'axes fraction', xytext = (0.705,-0.4), arrowprops = dict(arrowstyle = '<|-|>, head_width = 2, head_length = 2', linewidth = 5, color = 'k'))
+#plt.annotate('Bloom (Pollination)', xy = (0.39,-0.5), xycoords = 'axes fraction', fontsize = 35)
+#plt.annotate('', xy = (0.75, -0.4), xycoords = 'axes fraction', xytext = (0.87,-0.4), arrowprops = dict(arrowstyle = '<|-|>, head_width = 2, head_length = 2', linewidth = 5, color = 'k'))
+#plt.annotate('Growth', xy = (0.77, -0.5), xycoords = 'axes fraction', fontsize = 35)
+#plt.annotate('', xy = (0.905, -0.4), xycoords = 'axes fraction', xytext = (0.965,-0.4), arrowprops = dict(arrowstyle = '<|-|>, head_width = 2, head_length = 2', linewidth = 5, color = 'k'))
+#plt.annotate('Harvest', xy = (0.89, -0.5), xycoords = 'axes fraction', fontsize = 35)
+for county in range(0,16):     
+    formatting = "{:,.1f}"
+    from matplotlib.ticker import FuncFormatter
+    index = np.array(ACI_list)[:]
+    data = aci_contribution_rcp45_county_2090_change_percent_median[county]
+    index = np.delete(index, aci_delete_index)
+    data = np.delete(data, aci_delete_index)
+    index=np.array(index)
+    data=np.array(data)
+    changes = {'amount' : data}
+    def money(x, pos):
+        return formatting.format(x)
+    formatter = FuncFormatter(money)    
+    trans = pd.DataFrame(data=changes,index=index)
+    blank = trans.amount.cumsum().shift(1).fillna(0)
+    trans['positive'] = trans['amount'] > 0
+    total = trans.sum().amount
+    step = blank.reset_index(drop=True).repeat(3).shift(-1)
+    step[1::3] = np.nan
+    trans.loc[trans['positive'] > 1, 'positive'] = 99
+    trans.loc[trans['positive'] < 0, 'positive'] = 99
+    trans.loc[(trans['positive'] > 0) & (trans['positive'] < 1), 'positive'] = 99
+    trans['color'] = trans['positive']
+    trans.loc[trans['positive'] == 1, 'color'] = '#29EA38' #green_color
+    trans.loc[trans['positive'] == 0, 'color'] = '#FB3C62' #red_color
+    trans.loc[trans['positive'] == 99, 'color'] = '#24CAFF' #blue_color
+    my_colors = list(trans.color)
+    plt.subplot(17,1,county+2)
+    plt.text(s = str(county_list[county]), x = -3, y = -100, fontsize = 35)
+    plt.plot(step.index, step.values, 'k', linewidth = 2)
+    axs[county+1].bar(range(0,len(trans.index)), trans.amount, width=0.6, edgecolor = 'black',linewidth = 2,
+             bottom=blank, color=my_colors)       
+    plt.yticks(fontsize = 25)
+    y_height = trans.amount.cumsum().shift(1).fillna(0)
+    temp = list(trans.amount) 
+    for i in range(len(temp)):
+        if (i > 0) & (i < (len(temp) - 1)):
+            temp[i] = temp[i] + temp[i-1]
+    trans['temp'] = temp
+    plot_max = trans['temp'].max()
+    plot_min = trans['temp'].min()
+    if all(i >= 0 for i in temp):
+        plot_min = 0
+    if all(i < 0 for i in temp):
+        plot_max = 0
+    if abs(plot_max) >= abs(plot_min):
+        maxmax = abs(plot_max)   
+    else:
+        maxmax = abs(plot_min)
+    pos_offset = maxmax / 40
+    plot_offset = maxmax / 15 
+    loop = 0
+    #for index, row in trans.iterrows():
+     #   if row['amount'] == total:
+      #      y = y_height[loop]
+       # else:
+        #    y = y_height[loop] + row['amount']
+        #if row['amount'] > 0:
+         #   y += (pos_offset*2)
+          #  plt.annotate(formatting.format(row['amount']),(loop,y),ha="center", color = 'g', fontsize=20)
+        #else:
+         #   y -= (pos_offset*4)
+          #  plt.annotate(formatting.format(row['amount']),(loop,y-25),ha="center", color = 'r', fontsize=20)
+        #loop+=1
+    plt.ylim(-130,10)
+    plt.axhline(0, color='black', linewidth = 0.6, linestyle="dashed")
+    if county == 15:
+        plt.xticks(np.arange(0,len(trans)), trans.index, rotation=90, fontsize = 30)
+    else:
+        plt.tick_params(axis = 'x' , which = 'both', bottom = False, top = False, labelbottom = False)
+    for j in (0,2,4,6,8,10,12):
+        rect=mpatches.Rectangle([-0.5+j,-130], 1, 140, ec='white', fc='grey', alpha=0.2, clip_on=False)
+        axs[county+1].add_patch(rect)
+plt.annotate('', xy = (0.055, -3.5), xycoords = 'axes fraction', xytext = (0.24,-3.5), arrowprops = dict(arrowstyle = '<|-|>, head_width = 2, head_length = 2', linewidth = 5, color = 'k'))
+plt.annotate('Dormancy', xy = (0.095, -4.3), xycoords = 'axes fraction', fontsize = 35)
+plt.annotate('', xy = (0.295, -3.5), xycoords = 'axes fraction', xytext = (0.705,-3.5), arrowprops = dict(arrowstyle = '<|-|>, head_width = 2, head_length = 2', linewidth = 5, color = 'k'))
+plt.annotate('Bloom (Pollination)', xy = (0.39,-4.3), xycoords = 'axes fraction', fontsize = 35)
+plt.annotate('', xy = (0.75, -3.5), xycoords = 'axes fraction', xytext = (0.87,-3.5), arrowprops = dict(arrowstyle = '<|-|>, head_width = 2, head_length = 2', linewidth = 5, color = 'k'))
+plt.annotate('Growth', xy = (0.77, -4.3), xycoords = 'axes fraction', fontsize = 35)
+plt.annotate('', xy = (0.905, -3.5), xycoords = 'axes fraction', xytext = (0.965,-3.5), arrowprops = dict(arrowstyle = '<|-|>, head_width = 2, head_length = 2', linewidth = 5, color = 'k'))
+plt.annotate('Harvest', xy = (0.89, -4.3), xycoords = 'axes fraction', fontsize = 35)
+plt.savefig('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/Almond_plots/plot_hnrg/almond-land-avg/Growth_stage_ACI_6_19/waterfall_total_2090_rcp45.png', dpi = 200,bbox_inches='tight')
+
+
+## waterfall plot 4 state-level
+fig, axs = plt.subplots(2,2,figsize=(40,30))
+formatting = "{:,.1f}"
+from matplotlib.ticker import FuncFormatter
+index = np.array(ACI_list)[:]
+data = median_rcp45_2041_2060
+aci_delete_index = np.where(data == 0)
+index = np.delete(index, aci_delete_index)
+data = np.delete(data, aci_delete_index)
+index=np.array(index)
+data=np.array(data)
+changes = {'amount' : data}
+def money(x, pos):
+    return formatting.format(x)
+formatter = FuncFormatter(money)    
+trans = pd.DataFrame(data=changes,index=index)
+blank = trans.amount.cumsum().shift(1).fillna(0)
+trans['positive'] = trans['amount'] > 0
+total = trans.sum().amount
+#trans.loc['net']= total
+#blank.loc['net'] = total
+step = blank.reset_index(drop=True).repeat(3).shift(-1)
+step[1::3] = np.nan
+#blank.loc['net'] = 0
+trans.loc[trans['positive'] > 1, 'positive'] = 99
+trans.loc[trans['positive'] < 0, 'positive'] = 99
+trans.loc[(trans['positive'] > 0) & (trans['positive'] < 1), 'positive'] = 99
+trans['color'] = trans['positive']
+trans.loc[trans['positive'] == 1, 'color'] = '#29EA38' #green_color
+trans.loc[trans['positive'] == 0, 'color'] = '#FB3C62' #red_color
+trans.loc[trans['positive'] == 99, 'color'] = '#24CAFF' #blue_color
+my_colors = list(trans.color)
+#my_plot = plt.bar(np.arange(0,len(trans.index))-0.5, blank, width=0.4, color='black')
+plt.subplot(2,2,1)
+axs[0,0].bar(np.arange(0,len(trans.index)), trans.amount, width=0.6, edgecolor = 'black',linewidth = 2,
+         bottom=blank, color=my_colors)
+plt.plot(step.index, step.values, 'k', linewidth = 2)
+plt.yticks(fontsize = 35)
+plt.ylim(-120,10)
+y_height = trans.amount.cumsum().shift(1).fillna(0)
+temp = list(trans.amount) 
+for i in range(len(temp)):
+    if (i > 0) & (i < (len(temp) - 1)):
+        temp[i] = temp[i] + temp[i-1]
+trans['temp'] = temp
+plot_max = trans['temp'].max()
+plot_min = trans['temp'].min()
+if all(i >= 0 for i in temp):
+    plot_min = 0
+if all(i < 0 for i in temp):
+    plot_max = 0
+if abs(plot_max) >= abs(plot_min):
+    maxmax = abs(plot_max)   
+else:
+    maxmax = abs(plot_min)
+pos_offset = maxmax / 40
+plot_offset = maxmax / 15 
+loop = 0
+for index, row in trans.iterrows():
+    if row['amount'] == total:
+        y = y_height[loop]
+    else:
+        y = y_height[loop] + row['amount']
+    if row['amount'] > 0:
+        y += (pos_offset*2)
+        plt.annotate(formatting.format(row['amount']),(loop,y-2),ha="center", color = 'g', fontsize=25)
+    else:
+        y -= (pos_offset*4)
+        plt.annotate(formatting.format(row['amount']),(loop,y+3),ha="center", color = 'r', fontsize=25)
+    loop+=1
+#plt.xticks(np.arange(0,len(trans)), trans.index, rotation = 90, fontsize = 30)
+plt.axhline(0, color='black', linewidth = 0.6, linestyle="dashed")
+for i in (0,2,4,6,8,10,12):
+    rect=mpatches.Rectangle([-0.5+i,-120], 1, 130, ec='white', fc='grey', alpha=0.2, clip_on=False)
+    axs[0,0].add_patch(rect)
+plt.tick_params(axis = 'x' , which = 'both', bottom = False, top = False, labelbottom = False)
+plt.text(-3,-65, s = 'RCP 4.5', fontsize = 40, rotation = 'vertical')
+plt.text(4.8,20, s = 'By 2050', fontsize = 40)
+
+formatting = "{:,.1f}"
+from matplotlib.ticker import FuncFormatter
+index = np.array(ACI_list)[:]
+data = median_rcp45_2080_2099
+aci_delete_index = np.where(data == 0)
+index = np.delete(index, aci_delete_index)
+data = np.delete(data, aci_delete_index)
+index=np.array(index)
+data=np.array(data)
+changes = {'amount' : data}
+def money(x, pos):
+    return formatting.format(x)
+formatter = FuncFormatter(money)    
+trans = pd.DataFrame(data=changes,index=index)
+blank = trans.amount.cumsum().shift(1).fillna(0)
+trans['positive'] = trans['amount'] > 0
+total = trans.sum().amount
+#trans.loc['net']= total
+#blank.loc['net'] = total
+step = blank.reset_index(drop=True).repeat(3).shift(-1)
+step[1::3] = np.nan
+#blank.loc['net'] = 0
+trans.loc[trans['positive'] > 1, 'positive'] = 99
+trans.loc[trans['positive'] < 0, 'positive'] = 99
+trans.loc[(trans['positive'] > 0) & (trans['positive'] < 1), 'positive'] = 99
+trans['color'] = trans['positive']
+trans.loc[trans['positive'] == 1, 'color'] = '#29EA38' #green_color
+trans.loc[trans['positive'] == 0, 'color'] = '#FB3C62' #red_color
+trans.loc[trans['positive'] == 99, 'color'] = '#24CAFF' #blue_color
+my_colors = list(trans.color)
+#my_plot = plt.bar(np.arange(0,len(trans.index))-0.5, blank, width=0.4, color='black')
+plt.subplot(2,2,2)
+axs[0,1].bar(np.arange(0,len(trans.index)), trans.amount, width=0.6, edgecolor = 'black',linewidth = 2,
+         bottom=blank, color=my_colors)
+plt.plot(step.index, step.values, 'k', linewidth = 2)
+plt.yticks(fontsize = 35)
+plt.ylim(-120,10)
+y_height = trans.amount.cumsum().shift(1).fillna(0)
+temp = list(trans.amount) 
+for i in range(len(temp)):
+    if (i > 0) & (i < (len(temp) - 1)):
+        temp[i] = temp[i] + temp[i-1]
+trans['temp'] = temp
+plot_max = trans['temp'].max()
+plot_min = trans['temp'].min()
+if all(i >= 0 for i in temp):
+    plot_min = 0
+if all(i < 0 for i in temp):
+    plot_max = 0
+if abs(plot_max) >= abs(plot_min):
+    maxmax = abs(plot_max)   
+else:
+    maxmax = abs(plot_min)
+pos_offset = maxmax / 40
+plot_offset = maxmax / 15 
+loop = 0
+for index, row in trans.iterrows():
+    if row['amount'] == total:
+        y = y_height[loop]
+    else:
+        y = y_height[loop] + row['amount']
+    if row['amount'] > 0:
+        y += (pos_offset*2)
+        plt.annotate(formatting.format(row['amount']),(loop,y-2),ha="center", color = 'g', fontsize=25)
+    else:
+        y -= (pos_offset*4)
+        plt.annotate(formatting.format(row['amount']),(loop,y+3),ha="center", color = 'r', fontsize=25)
+    loop+=1
+#plt.xticks(np.arange(0,len(trans)), trans.index, rotation = 90, fontsize = 30)
+plt.axhline(0, color='black', linewidth = 0.6, linestyle="dashed")
+for i in (0,2,4,6,8,10,12):
+    rect=mpatches.Rectangle([-0.5+i,-120], 1, 130, ec='white', fc='grey', alpha=0.2, clip_on=False)
+    axs[0,1].add_patch(rect)
+plt.tick_params(axis = 'x' , which = 'both', bottom = False, top = False, labelbottom = False)
+plt.text(4.8,20, s = 'By 2090', fontsize = 40)
+
+formatting = "{:,.1f}"
+from matplotlib.ticker import FuncFormatter
+index = np.array(ACI_list)[:]
+data = median_rcp85_2041_2060
+aci_delete_index = np.where(data == 0)
+index = np.delete(index, aci_delete_index)
+data = np.delete(data, aci_delete_index)
+index=np.array(index)
+data=np.array(data)
+changes = {'amount' : data}
+def money(x, pos):
+    return formatting.format(x)
+formatter = FuncFormatter(money)    
+trans = pd.DataFrame(data=changes,index=index)
+blank = trans.amount.cumsum().shift(1).fillna(0)
+trans['positive'] = trans['amount'] > 0
+total = trans.sum().amount
+#trans.loc['net']= total
+#blank.loc['net'] = total
+step = blank.reset_index(drop=True).repeat(3).shift(-1)
+step[1::3] = np.nan
+#blank.loc['net'] = 0
+trans.loc[trans['positive'] > 1, 'positive'] = 99
+trans.loc[trans['positive'] < 0, 'positive'] = 99
+trans.loc[(trans['positive'] > 0) & (trans['positive'] < 1), 'positive'] = 99
+trans['color'] = trans['positive']
+trans.loc[trans['positive'] == 1, 'color'] = '#29EA38' #green_color
+trans.loc[trans['positive'] == 0, 'color'] = '#FB3C62' #red_color
+trans.loc[trans['positive'] == 99, 'color'] = '#24CAFF' #blue_color
+my_colors = list(trans.color)
+#my_plot = plt.bar(np.arange(0,len(trans.index))-0.5, blank, width=0.4, color='black')
+plt.subplot(2,2,3)
+axs[1,0].bar(np.arange(0,len(trans.index)), trans.amount, width=0.6, edgecolor = 'black',linewidth = 2,
+         bottom=blank, color=my_colors)
+plt.plot(step.index, step.values, 'k', linewidth = 2)
+plt.yticks(fontsize = 35)
+plt.ylim(-120,10)
+y_height = trans.amount.cumsum().shift(1).fillna(0)
+temp = list(trans.amount) 
+for i in range(len(temp)):
+    if (i > 0) & (i < (len(temp) - 1)):
+        temp[i] = temp[i] + temp[i-1]
+trans['temp'] = temp
+plot_max = trans['temp'].max()
+plot_min = trans['temp'].min()
+if all(i >= 0 for i in temp):
+    plot_min = 0
+if all(i < 0 for i in temp):
+    plot_max = 0
+if abs(plot_max) >= abs(plot_min):
+    maxmax = abs(plot_max)   
+else:
+    maxmax = abs(plot_min)
+pos_offset = maxmax / 40
+plot_offset = maxmax / 15 
+loop = 0
+for index, row in trans.iterrows():
+    if row['amount'] == total:
+        y = y_height[loop]
+    else:
+        y = y_height[loop] + row['amount']
+    if row['amount'] > 0:
+        y += (pos_offset*2)
+        plt.annotate(formatting.format(row['amount']),(loop,y-2),ha="center", color = 'g', fontsize=25)
+    else:
+        y -= (pos_offset*4)
+        plt.annotate(formatting.format(row['amount']),(loop,y+3),ha="center", color = 'r', fontsize=25)
+    loop+=1
+#plt.xticks(np.arange(0,len(trans)), trans.index, rotation = 90, fontsize = 30)
+plt.axhline(0, color='black', linewidth = 0.6, linestyle="dashed")
+for i in (0,2,4,6,8,10,12):
+    rect=mpatches.Rectangle([-0.5+i,-120], 1, 130, ec='white', fc='grey', alpha=0.2, clip_on=False)
+    axs[1,0].add_patch(rect)
+plt.xticks(np.arange(0,len(trans)), trans.index, rotation=90, fontsize = 30)
+plt.text(-3,-65, s = 'RCP 8.5', fontsize = 40, rotation = 'vertical')
+annotate_y = -0.5
+plt.annotate('', xy = (0.05, annotate_y), xycoords = 'axes fraction', xytext = (0.225,annotate_y), arrowprops = dict(arrowstyle = '<|-|>, head_width = 2, head_length = 2', linewidth = 5, color = 'k'))
+plt.annotate('Dormancy', xy = (0.05, annotate_y-0.1), xycoords = 'axes fraction', fontsize = 35)
+plt.annotate('', xy = (0.265, annotate_y), xycoords = 'axes fraction', xytext = (0.66,annotate_y), arrowprops = dict(arrowstyle = '<|-|>, head_width = 2, head_length = 2', linewidth = 5, color = 'k'))
+plt.annotate('Bloom (Pollination)', xy = (0.305,annotate_y-0.1), xycoords = 'axes fraction', fontsize = 35)
+plt.annotate('', xy = (0.7, annotate_y), xycoords = 'axes fraction', xytext = (0.88,annotate_y), arrowprops = dict(arrowstyle = '<|-|>, head_width = 2, head_length = 2', linewidth = 5, color = 'k'))
+plt.annotate('Growth', xy = (0.73, annotate_y-0.1), xycoords = 'axes fraction', fontsize = 35)
+plt.annotate('', xy = (0.9, annotate_y), xycoords = 'axes fraction', xytext = (0.97,annotate_y), arrowprops = dict(arrowstyle = '<|-|>, head_width = 2, head_length = 2', linewidth = 5, color = 'k'))
+plt.annotate('Harvest', xy = (0.87, annotate_y-0.1), xycoords = 'axes fraction', fontsize = 35)
+
+formatting = "{:,.1f}"
+from matplotlib.ticker import FuncFormatter
+index = np.array(ACI_list)[:]
+data = median_rcp85_2080_2099
+aci_delete_index = np.where(data == 0)
+index = np.delete(index, aci_delete_index)
+data = np.delete(data, aci_delete_index)
+index=np.array(index)
+data=np.array(data)
+changes = {'amount' : data}
+def money(x, pos):
+    return formatting.format(x)
+formatter = FuncFormatter(money)    
+trans = pd.DataFrame(data=changes,index=index)
+blank = trans.amount.cumsum().shift(1).fillna(0)
+trans['positive'] = trans['amount'] > 0
+total = trans.sum().amount
+#trans.loc['net']= total
+#blank.loc['net'] = total
+step = blank.reset_index(drop=True).repeat(3).shift(-1)
+step[1::3] = np.nan
+#blank.loc['net'] = 0
+trans.loc[trans['positive'] > 1, 'positive'] = 99
+trans.loc[trans['positive'] < 0, 'positive'] = 99
+trans.loc[(trans['positive'] > 0) & (trans['positive'] < 1), 'positive'] = 99
+trans['color'] = trans['positive']
+trans.loc[trans['positive'] == 1, 'color'] = '#29EA38' #green_color
+trans.loc[trans['positive'] == 0, 'color'] = '#FB3C62' #red_color
+trans.loc[trans['positive'] == 99, 'color'] = '#24CAFF' #blue_color
+my_colors = list(trans.color)
+#my_plot = plt.bar(np.arange(0,len(trans.index))-0.5, blank, width=0.4, color='black')
+plt.subplot(2,2,4)
+axs[1,1].bar(np.arange(0,len(trans.index)), trans.amount, width=0.6, edgecolor = 'black',linewidth = 2,
+         bottom=blank, color=my_colors)
+plt.plot(step.index, step.values, 'k', linewidth = 2)
+plt.yticks(fontsize = 35)
+plt.ylim(-120,10)
+y_height = trans.amount.cumsum().shift(1).fillna(0)
+temp = list(trans.amount) 
+for i in range(len(temp)):
+    if (i > 0) & (i < (len(temp) - 1)):
+        temp[i] = temp[i] + temp[i-1]
+trans['temp'] = temp
+plot_max = trans['temp'].max()
+plot_min = trans['temp'].min()
+if all(i >= 0 for i in temp):
+    plot_min = 0
+if all(i < 0 for i in temp):
+    plot_max = 0
+if abs(plot_max) >= abs(plot_min):
+    maxmax = abs(plot_max)   
+else:
+    maxmax = abs(plot_min)
+pos_offset = maxmax / 40
+plot_offset = maxmax / 15 
+loop = 0
+for index, row in trans.iterrows():
+    if row['amount'] == total:
+        y = y_height[loop]
+    else:
+        y = y_height[loop] + row['amount']
+    if row['amount'] > 0:
+        y += (pos_offset*2)
+        plt.annotate(formatting.format(row['amount']),(loop,y-2),ha="center", color = 'g', fontsize=25)
+    else:
+        y -= (pos_offset*4)
+        plt.annotate(formatting.format(row['amount']),(loop,y+3),ha="center", color = 'r', fontsize=25)
+    loop+=1
+#plt.xticks(np.arange(0,len(trans)), trans.index, rotation = 90, fontsize = 30)
+plt.axhline(0, color='black', linewidth = 0.6, linestyle="dashed")
+for i in (0,2,4,6,8,10,12):
+    rect=mpatches.Rectangle([-0.5+i,-120], 1, 130, ec='white', fc='grey', alpha=0.2, clip_on=False)
+    axs[1,1].add_patch(rect)
+plt.xticks(np.arange(0,len(trans)), trans.index, rotation=90, fontsize = 30)
+annotate_y = -0.5
+plt.annotate('', xy = (0.05, annotate_y), xycoords = 'axes fraction', xytext = (0.225,annotate_y), arrowprops = dict(arrowstyle = '<|-|>, head_width = 2, head_length = 2', linewidth = 5, color = 'k'))
+plt.annotate('Dormancy', xy = (0.05, annotate_y-0.1), xycoords = 'axes fraction', fontsize = 35)
+plt.annotate('', xy = (0.265, annotate_y), xycoords = 'axes fraction', xytext = (0.66,annotate_y), arrowprops = dict(arrowstyle = '<|-|>, head_width = 2, head_length = 2', linewidth = 5, color = 'k'))
+plt.annotate('Bloom (Pollination)', xy = (0.305,annotate_y-0.1), xycoords = 'axes fraction', fontsize = 35)
+plt.annotate('', xy = (0.7, annotate_y), xycoords = 'axes fraction', xytext = (0.88,annotate_y), arrowprops = dict(arrowstyle = '<|-|>, head_width = 2, head_length = 2', linewidth = 5, color = 'k'))
+plt.annotate('Growth', xy = (0.73, annotate_y-0.1), xycoords = 'axes fraction', fontsize = 35)
+plt.annotate('', xy = (0.9, annotate_y), xycoords = 'axes fraction', xytext = (0.97,annotate_y), arrowprops = dict(arrowstyle = '<|-|>, head_width = 2, head_length = 2', linewidth = 5, color = 'k'))
+plt.annotate('Harvest', xy = (0.87, annotate_y-0.1), xycoords = 'axes fraction', fontsize = 35)
+plt.savefig('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/Almond_plots/plot_hnrg/almond-land-avg/Growth_stage_ACI_6_19/waterfall_state_all.png', dpi = 200,bbox_inches='tight')
+
+
+
+formatting = "{:,.1f}"
+from matplotlib.ticker import FuncFormatter
+index = np.array(ACI_list)[:]
+data = median_rcp85_2080_2099
+aci_delete_index = np.where(data == 0)
+index = np.delete(index, aci_delete_index)
+data = np.delete(data, aci_delete_index)
+index=np.array(index)
+data=np.array(data)
+changes = {'amount' : data}
+def money(x, pos):
+    return formatting.format(x)
+formatter = FuncFormatter(money)    
+trans = pd.DataFrame(data=changes,index=index)
+blank = trans.amount.cumsum().shift(1).fillna(0)
+trans['positive'] = trans['amount'] > 0
+total = trans.sum().amount
+#trans.loc['net']= total
+#blank.loc['net'] = total
+step = blank.reset_index(drop=True).repeat(3).shift(-1)
+step[1::3] = np.nan
+#blank.loc['net'] = 0
+trans.loc[trans['positive'] > 1, 'positive'] = 99
+trans.loc[trans['positive'] < 0, 'positive'] = 99
+trans.loc[(trans['positive'] > 0) & (trans['positive'] < 1), 'positive'] = 99
+trans['color'] = trans['positive']
+trans.loc[trans['positive'] == 1, 'color'] = '#29EA38' #green_color
+trans.loc[trans['positive'] == 0, 'color'] = '#FB3C62' #red_color
+trans.loc[trans['positive'] == 99, 'color'] = '#24CAFF' #blue_color
+my_colors = list(trans.color)
+#my_plot = plt.bar(np.arange(0,len(trans.index))-0.5, blank, width=0.4, color='black')
+fig,ax=plt.subplots(1,1, figsize = (27,14))
+plt.plot(step.index, step.values, 'k', linewidth = 2)
+plt.bar(np.arange(0,len(trans.index)), trans.amount, width=0.6, edgecolor = 'black',linewidth = 2,
+         bottom=blank, color=my_colors)       
+plt.yticks(fontsize = 35)
+plt.ylim(-120,30)
+plt.title('% of ACI Contribution to Yield Change by End of the Century under RCP8.5', fontsize = 35, y =1.05)
+y_height = trans.amount.cumsum().shift(1).fillna(0)
+temp = list(trans.amount) 
+for i in range(len(temp)):
+    if (i > 0) & (i < (len(temp) - 1)):
+        temp[i] = temp[i] + temp[i-1]
+
+trans['temp'] = temp
+        
+plot_max = trans['temp'].max()
+plot_min = trans['temp'].min()
+
+if all(i >= 0 for i in temp):
+    plot_min = 0
+if all(i < 0 for i in temp):
+    plot_max = 0
+
+if abs(plot_max) >= abs(plot_min):
+    maxmax = abs(plot_max)   
+else:
+    maxmax = abs(plot_min)
+    
+pos_offset = maxmax / 40
+
+plot_offset = maxmax / 15 
+loop = 0
+for index, row in trans.iterrows():
+    if row['amount'] == total:
+        y = y_height[loop]
+    else:
+        y = y_height[loop] + row['amount']
+    if row['amount'] > 0:
+        y += (pos_offset*2)
+        plt.annotate(formatting.format(row['amount']),(loop,y-2),ha="center", color = 'g', fontsize=25)
+    else:
+        y -= (pos_offset*4)
+        plt.annotate(formatting.format(row['amount']),(loop,y+3),ha="center", color = 'r', fontsize=25)
+    loop+=1
+plt.xticks(np.arange(0,len(trans)), trans.index, rotation = 90, fontsize = 30)
+plt.axhline(0, color='black', linewidth = 0.6, linestyle="dashed")
+for i in (0,2,4,6,8,10):
+    rect=mpatches.Rectangle([-0.5+i,-120], 1, 150, ec='white', fc='grey', alpha=0.2, clip_on=False)
+    ax.add_patch(rect)
+plt.annotate('', xy = (0.055, -0.4), xycoords = 'axes fraction', xytext = (0.24,-0.4), arrowprops = dict(arrowstyle = '<|-|>, head_width = 2, head_length = 2', linewidth = 5, color = 'k'))
+plt.annotate('Dormancy', xy = (0.095, -0.5), xycoords = 'axes fraction', fontsize = 35)
+plt.annotate('', xy = (0.295, -0.4), xycoords = 'axes fraction', xytext = (0.705,-0.4), arrowprops = dict(arrowstyle = '<|-|>, head_width = 2, head_length = 2', linewidth = 5, color = 'k'))
+plt.annotate('Bloom (Pollination)', xy = (0.39,-0.5), xycoords = 'axes fraction', fontsize = 35)
+plt.annotate('', xy = (0.75, -0.4), xycoords = 'axes fraction', xytext = (0.87,-0.4), arrowprops = dict(arrowstyle = '<|-|>, head_width = 2, head_length = 2', linewidth = 5, color = 'k'))
+plt.annotate('Growth', xy = (0.77, -0.5), xycoords = 'axes fraction', fontsize = 35)
+plt.annotate('', xy = (0.905, -0.4), xycoords = 'axes fraction', xytext = (0.965,-0.4), arrowprops = dict(arrowstyle = '<|-|>, head_width = 2, head_length = 2', linewidth = 5, color = 'k'))
+plt.annotate('Harvest', xy = (0.89, -0.5), xycoords = 'axes fraction', fontsize = 35)
+#plt.tight_layout()
+plt.savefig('C:C:/Users/Pancake/Box/UCDGlobalChange/shqwu/Almond_plots/plot_hnrg/almond-land-avg/Growth_stage_ACI_6_19/median_waterfall_total_2090_rcp85.png', dpi = 200,bbox_inches='tight')
+    
+    
+    
+##plot map of yield change for each county
+county_list = ['Butte', 'Colusa', 'Fresno', 'Glenn', 'Kern', 'Kings', 'Madera', 'Merced', 'San Joaquin', 'Solano', 'Stanislaus', 'Sutter', 'Tehama', 'Tulare', 'Yolo', 'Yuba']
+for i in range(0,16):
+    locals()[str(county_list[i])+'yield_rcp45'] = np.row_stack((np.split(yield_all_model_hist_rcp45, 16)[i], np.split(yield_all_model_future_rcp45, 16)[i]))
+    locals()[str(county_list[i])+'yield_rcp45_s'] = np.row_stack((np.split(yield_all_model_hist_rcp45_s, 16)[i], np.split(yield_all_model_future_rcp45_s, 16)[i]))
+    locals()[str(county_list[i])+'yield_rcp85'] = np.row_stack((np.split(yield_all_model_hist_rcp85, 16)[i], np.split(yield_all_model_future_rcp85, 16)[i]))
+    locals()[str(county_list[i])+'yield_rcp85_s'] = np.row_stack((np.split(yield_all_model_hist_rcp85_s, 16)[i], np.split(yield_all_model_future_rcp85_s, 16)[i]))
+
+for i in range(0,16):
+    locals()[str(county_list[i])+'county_yield_change_2000'] = np.zeros((17000,4))
+    locals()[str(county_list[i])+'county_yield_change_2000'][:,0] = (np.nanmean(locals()[str(county_list[i])+'yield_rcp45'][20:40,:], axis = 0))
+    locals()[str(county_list[i])+'county_yield_change_2000'][:,1] = (np.nanmean(locals()[str(county_list[i])+'yield_rcp45_s'][20:40,:], axis = 0))
+    locals()[str(county_list[i])+'county_yield_change_2000'][:,2] = (np.nanmean(locals()[str(county_list[i])+'yield_rcp85'][20:40,:], axis = 0))
+    locals()[str(county_list[i])+'county_yield_change_2000'][:,3] = (np.nanmean(locals()[str(county_list[i])+'yield_rcp85_s'][20:40,:], axis = 0))
+    locals()[str(county_list[i])+'county_tech_change_2000'] = np.zeros((2))
+    locals()[str(county_list[i])+'county_tech_change_2000'][0] = np.mean(future_tech_trend_county_rcp45[20:40,i])
+    locals()[str(county_list[i])+'county_tech_change_2000'][1] = np.mean(future_tech_trend_county_rcp85[20:40,i])
+    
+    locals()[str(county_list[i])+'county_yield_change_2050'] = np.zeros((17000,4))
+    locals()[str(county_list[i])+'county_yield_change_2050'][:,0] = ((np.nanmean(locals()[str(county_list[i])+'yield_rcp45'][60:80,:], axis=0))-locals()[str(county_list[i])+'county_yield_change_2000'][:,0])*100/locals()[str(county_list[i])+'county_yield_change_2000'][:,0]
+    locals()[str(county_list[i])+'county_yield_change_2050'][:,1] = ((np.nanmean(locals()[str(county_list[i])+'yield_rcp45_s'][60:80,:], axis=0))-locals()[str(county_list[i])+'county_yield_change_2000'][:,1])*100/locals()[str(county_list[i])+'county_yield_change_2000'][:,1]
+    locals()[str(county_list[i])+'county_yield_change_2050'][:,2] = ((np.nanmean(locals()[str(county_list[i])+'yield_rcp85'][60:80,:], axis=0))-locals()[str(county_list[i])+'county_yield_change_2000'][:,2])*100/locals()[str(county_list[i])+'county_yield_change_2000'][:,2]
+    locals()[str(county_list[i])+'county_yield_change_2050'][:,3] = ((np.nanmean(locals()[str(county_list[i])+'yield_rcp85_s'][60:80,:], axis=0))-locals()[str(county_list[i])+'county_yield_change_2000'][:,3])*100/locals()[str(county_list[i])+'county_yield_change_2000'][:,3]
+    locals()[str(county_list[i])+'county_tech_change_2050'] = np.zeros((2))
+    locals()[str(county_list[i])+'county_tech_change_2050'][0] = 100 * (np.mean(future_tech_trend_county_rcp45[60:80,i]) - np.mean(future_tech_trend_county_rcp45[20:40,i])) / np.mean(future_tech_trend_county_rcp45[20:40,i])
+    locals()[str(county_list[i])+'county_tech_change_2050'][1] = 100 * (np.mean(future_tech_trend_county_rcp85[60:80,i]) - np.mean(future_tech_trend_county_rcp85[20:40,i])) / np.mean(future_tech_trend_county_rcp85[20:40,i])
+    
+    locals()[str(county_list[i])+'county_yield_change_2099'] = np.zeros((17000,4))
+    locals()[str(county_list[i])+'county_yield_change_2099'][:,0] = ((np.nanmean(locals()[str(county_list[i])+'yield_rcp45'][100:120,:], axis=0))-locals()[str(county_list[i])+'county_yield_change_2000'][:,0])*100/locals()[str(county_list[i])+'county_yield_change_2000'][:,0]
+    locals()[str(county_list[i])+'county_yield_change_2099'][:,1] = ((np.nanmean(locals()[str(county_list[i])+'yield_rcp45_s'][100:120,:], axis=0))-locals()[str(county_list[i])+'county_yield_change_2000'][:,1])*100/locals()[str(county_list[i])+'county_yield_change_2000'][:,1]
+    locals()[str(county_list[i])+'county_yield_change_2099'][:,2] = ((np.nanmean(locals()[str(county_list[i])+'yield_rcp85'][100:120,:], axis=0))-locals()[str(county_list[i])+'county_yield_change_2000'][:,2])*100/locals()[str(county_list[i])+'county_yield_change_2000'][:,2]
+    locals()[str(county_list[i])+'county_yield_change_2099'][:,3] = ((np.nanmean(locals()[str(county_list[i])+'yield_rcp85_s'][100:120,:], axis=0))-locals()[str(county_list[i])+'county_yield_change_2000'][:,3])*100/locals()[str(county_list[i])+'county_yield_change_2000'][:,3]
+    locals()[str(county_list[i])+'county_tech_change_2099'] = np.zeros((2))
+    locals()[str(county_list[i])+'county_tech_change_2099'][0] = 100 * (np.mean(future_tech_trend_county_rcp45[100:120,i]) - np.mean(future_tech_trend_county_rcp45[20:40,i])) / np.mean(future_tech_trend_county_rcp45[20:40,i])
+    locals()[str(county_list[i])+'county_tech_change_2099'][1] = 100 * (np.mean(future_tech_trend_county_rcp85[100:120,i]) - np.mean(future_tech_trend_county_rcp85[20:40,i])) / np.mean(future_tech_trend_county_rcp85[20:40,i])
+
+
+
+median_yield_change_2050 = np.zeros((16,4))
+median_yield_change_2099 = np.zeros((16,4))
+median_tech_change_2050 = np.zeros((16,2))
+median_tech_change_2099 = np.zeros((16,2))
+
+for i in range(0,16):
+    median_yield_change_2050[i,:] = np.nanmedian(locals()[str(county_list[i])+'county_yield_change_2050'], axis = 0)
+    median_yield_change_2099[i,:] = np.nanmedian(locals()[str(county_list[i])+'county_yield_change_2099'], axis = 0)
+    median_tech_change_2050[i,:] = locals()[str(county_list[i])+'county_tech_change_2050']
+    median_tech_change_2099[i,:] = locals()[str(county_list[i])+'county_tech_change_2099']
+    
+yield_change_for_shp_45_2099 = np.zeros((58))
+yield_change_for_shp_45_2099[:] = np.nan
+yield_change_for_shp_85_2099 = np.zeros((58))
+yield_change_for_shp_85_2099[:] = np.nan
+yield_change_for_shp_45_2050 = np.zeros((58))
+yield_change_for_shp_45_2050[:] = np.nan
+yield_change_for_shp_85_2050 = np.zeros((58))
+yield_change_for_shp_85_2050[:] = np.nan
+
+tech_change_for_shp_45_2050 = np.zeros((58))
+tech_change_for_shp_45_2050[:] = np.nan
+tech_change_for_shp_85_2050 = np.zeros((58))
+tech_change_for_shp_85_2050[:] = np.nan
+tech_change_for_shp_45_2099 = np.zeros((58))
+tech_change_for_shp_45_2099[:] = np.nan
+tech_change_for_shp_85_2099 = np.zeros((58))
+tech_change_for_shp_85_2099[:] = np.nan
+
+N_S_order = np.zeros((16))
+
+ca = geopandas.read_file('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/CA_Counties/CA_Counties_TIGER2016.shp')
+ca_county_remove_shp = geopandas.read_file('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/CA_Counties/CA_Counties_TIGER2016.shp')
+ca_county_remove = ['Sierra', 'Sacramento', 'Santa Barbara', 'Calaveras', 'Ventura','Los Angeles', 'Sonoma', 'San Diego', 'Placer', 'San Francisco', 'Marin', 'Mariposa', 'Lassen', 'Napa',
+                    'Shasta', 'Monterey','Trinity', 'Mendocino', 'Inyo', 'Mono', 'Tuolumne', 'San Bernardino', 'Contra Costa', 'Alpine', 'El Dorado', 'San Benito', 'Humboldt','Riverside',
+                    'Del Norte', 'Modoc', 'Santa Clara', 'Alameda', 'Nevada', 'Orange', 'Imperial', 'Amador', 'Lake', 'Plumas', 'San Mateo', 'Siskiyou', 'Santa Cruz','San Luis Obispo']
+for i in range(0,len(ca_county_remove)):
+    ca_county_remove_shp.drop(ca_county_remove_shp.index[ca_county_remove_shp['NAME']==ca_county_remove[i]], inplace=True)
+
+
+for i in range(0,58):
+    for index in range(0,16):
+        if county_list[index] == ca.NAME[i]:
+            yield_change_for_shp_45_2099[i] = median_yield_change_2099[index,1]
+            yield_change_for_shp_85_2099[i] = median_yield_change_2099[index,3]
+            yield_change_for_shp_45_2050[i] = median_yield_change_2050[index,1]
+            yield_change_for_shp_85_2050[i] = median_yield_change_2050[index,3] 
+            tech_change_for_shp_45_2050[i] = median_tech_change_2050[index, 0]
+            tech_change_for_shp_85_2050[i] = median_tech_change_2050[index, 1]
+            tech_change_for_shp_45_2099[i] = median_tech_change_2099[index, 0]
+            tech_change_for_shp_85_2099[i] = median_tech_change_2099[index, 1]
+            
+county_order_N_S = ['Tehama', 'Butte', 'Glenn', 'Yuba', 'Colusa', 'Sutter', 'Yolo', 'Solano', 'San Joaquin', 'Stanislaus', 'Madera', 'Merced', 'Fresno', 'Tulare', 'Kings', 'Kern']
+
+for i in range(0,16):
+    N_S_order[np.array(np.where(ca_county_remove_shp['NAME'] == county_order_N_S[i]))] = i+1
+ca_county_remove_shp['N_S_order'] = N_S_order.astype(int)
+#county-level hist yield average
+
+
+yield_for_shp_obs_hist = np.zeros((58))
+yield_for_shp_obs_hist[:] = np.nan
+for i in range(0,58):
+    for index in range(0,16):
+        if county_list[index] == ca.NAME[i]:
+            yield_for_shp_obs_hist[i] = np.mean(yield_csv[:, 1:], axis = 0)[index]
+            
+yield_for_shp_gridmet_hist = np.zeros((58))
+yield_for_shp_gridmet_hist[:] = np.nan
+for i in range(0,58):
+    for index in range(0,16):
+        if county_list[index] == ca.NAME[i]:
+            yield_for_shp_gridmet_hist[i] = (np.mean(np.split(np.median(simulation_gridmet, axis = 1),16)[index])-yield_for_shp_obs_hist[i])*100/yield_for_shp_obs_hist[i]
+
+yield_for_shp_maca_rcp85_hist = np.zeros((58))
+yield_for_shp_maca_rcp85_hist[:] = np.nan
+for i in range(0,58):
+    for index in range(0,16):
+        if county_list[index] == ca.NAME[i]:
+            yield_for_shp_maca_rcp85_hist[i] = (np.mean(np.split(yield_all_model_hist_rcp85_average_model,16)[index])-yield_for_shp_obs_hist[i])*100/yield_for_shp_obs_hist[i]
+
+yield_for_shp_maca_rcp45_hist = np.zeros((58))
+yield_for_shp_maca_rcp45_hist[:] = np.nan
+for i in range(0,58):
+    for index in range(0,16):
+        if county_list[index] == ca.NAME[i]:
+            yield_for_shp_maca_rcp45_hist[i] = (np.mean(np.split(yield_all_model_hist_rcp45_average_model,16)[index])-yield_for_shp_obs_hist[i])*100/yield_for_shp_obs_hist[i]
+yield_for_shp_hist_df = pd.DataFrame({'NAME' : ca.NAME, 'Observation' : yield_for_shp_obs_hist, 'Gridmet' : yield_for_shp_gridmet_hist, 'RCP4.5' : yield_for_shp_maca_rcp45_hist, 'RCP8.5' : yield_for_shp_maca_rcp85_hist})
+ca_merge_hist = ca.merge(yield_for_shp_hist_df, on = 'NAME')
+
+fig, axes = plt.subplots(1,3, figsize=(40,12))
+ax1 = ca_merge_hist.plot(ax = axes[0], column = ca_merge_hist.Observation,edgecolor='black',missing_kwds={'color': 'white'}, legend = True, cmap = 'OrRd')
+ax1.set_axis_off()
+ax1.set_title('Averaged Observed Almond \n Yield ton/acre over 1980-2020', fontsize = 35)
+ax2 = ca_merge_hist.plot(ax = axes[1], column = ca_merge_hist.Gridmet,edgecolor='black',missing_kwds={'color': 'white'}, legend = True, cmap = 'RdBu_r', vmin = -6, vmax =6)
+ax2.set_axis_off()
+ax2.set_title('Averaged GridMet-Observed Yield \n Difference % over 1980-2020', fontsize = 35)
+ax4 = ca_merge_hist.plot(ax = axes[2], column = 'RCP8.5' ,edgecolor='black',missing_kwds={'color': 'white'}, legend = True, cmap = 'RdBu_r', vmin = -6, vmax =6)
+ax4.set_axis_off()
+ax4.set_title('Averaged MACA(RCP4.5)-Observed Yield \n Difference % over 1980-2020', fontsize = 35)
+ca_county_remove_shp['coords'] = ca_county_remove_shp['geometry'].apply(lambda x: x.representative_point().coords[:])
+ca_county_remove_shp['coords'] = [coords[0] for coords in ca_county_remove_shp['coords']]
+for idx, row in ca_county_remove_shp.iterrows():
+   ax1.annotate(row['NAME'], xy=row['coords'], horizontalalignment='center', color='black', fontsize =12)
+   ax2.annotate(row['NAME'], xy=row['coords'], horizontalalignment='center', color='black', fontsize =12)
+   ax4.annotate(row['NAME'], xy=row['coords'], horizontalalignment='center', color='black', fontsize =12)
+fig4 = ax4.figure
+fig4.axes[3].tick_params(labelsize = 35)
+fig4.axes[4].tick_params(labelsize = 35)
+fig4.axes[5].tick_params(labelsize = 35)
+plt.savefig('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/Almond_plots/plot_hnrg/almond-land-avg/Growth_stage_ACI_6_19/map_current_period_obs_gridmet_maca.png', dpi = 200)
+
+
+yield_change_for_shp_45_2050_df = pd.DataFrame({'NAME' : ca.NAME, 'rcp45_2050' : yield_change_for_shp_45_2050})
+tech_change_for_shp_45_2050_df = pd.DataFrame({'NAME' : ca.NAME, 'rcp45_2050' : tech_change_for_shp_45_2050})
+yield_change_for_shp_85_2050_df = pd.DataFrame({'NAME' : ca.NAME, 'rcp85_2050' : yield_change_for_shp_85_2050})
+tech_change_for_shp_85_2050_df = pd.DataFrame({'NAME' : ca.NAME, 'rcp85_2050' : tech_change_for_shp_85_2050})
+tech_change_for_shp_45_2090_df = pd.DataFrame({'NAME' : ca.NAME, 'rcp45_2090' : tech_change_for_shp_45_2099})
+tech_change_for_shp_85_2090_df = pd.DataFrame({'NAME' : ca.NAME, 'rcp85_2090' : tech_change_for_shp_85_2099})
+
+ca_merge_rcp45_2050 =  ca.merge(yield_change_for_shp_45_2050_df, on = 'NAME')
+ca_merge_rcp85_2050 =  ca.merge(yield_change_for_shp_85_2050_df, on = 'NAME')
+ca_merge_rcp85_2050_tech = ca.merge(tech_change_for_shp_85_2050_df, on = 'NAME')
+ca_merge_rcp45_2050_tech = ca.merge(tech_change_for_shp_45_2050_df, on = 'NAME')
+ca_merge_rcp85_2090_tech = ca.merge(tech_change_for_shp_85_2090_df, on = 'NAME')
+ca_merge_rcp45_2090_tech = ca.merge(tech_change_for_shp_45_2090_df, on = 'NAME')
+
+df_county_yield_rcp45 = pd.DataFrame()
+df_county_yield_rcp85 = pd.DataFrame()
+
+for i in range(0,16):
+    df_county_yield_rcp45_ind = pd.DataFrame({'County' : str(county_list[i]) , 'Yield Change % by 2050' : locals()[str(county_list[i])+'county_yield_change_2050'][:,1]})
+    df_county_yield_rcp45 = df_county_yield_rcp45.append(df_county_yield_rcp45_ind)
+    df_county_yield_rcp85_ind = pd.DataFrame({'County' : str(county_list[i]) , 'Yield Change % by 2050' : locals()[str(county_list[i])+'county_yield_change_2050'][:,3]})
+    df_county_yield_rcp85 = df_county_yield_rcp85.append(df_county_yield_rcp85_ind)
+
+from matplotlib import cm
+norm = matplotlib.colors.Normalize(vmax = 0,vmin = -100)
+fig, axes = plt.subplots(1,2, figsize=(30,12))
+plt.subplot(1,2,1)
+ax = ca_merge_rcp45_2050.plot(ax = axes[0], column = ca_merge_rcp45_2050.rcp45_2050,edgecolor='black',missing_kwds={'color': 'white'}, legend = True, cmap = 'OrRd_r', figsize = (15,15),vmin = -100, vmax = 0)
+fig1 = ax.figure
+fig1.axes[2].tick_params(labelsize = 30)
+ax.set_axis_off()
+fig = ax.figure
+cb_ax = fig.axes[1]
+cb_ax.tick_params(labelsize = 30)
+ca_county_remove_shp['coords'] = ca_county_remove_shp['geometry'].apply(lambda x: x.representative_point().coords[:])
+ca_county_remove_shp['coords'] = [coords[0] for coords in ca_county_remove_shp['coords']]
+for idx, row in ca_county_remove_shp.iterrows():
+   plt.annotate(row['N_S_order'], xy=row['coords'], horizontalalignment='center', color='black', fontsize =20)
+county_order_N_S = ['Tehama', 'Butte', 'Glenn', 'Yuba', 'Colusa', 'Sutter', 'Yolo', 'Solano', 'San Joaquin', 'Stanislaus', 'Madera', 'Merced', 'Fresno', 'Tulare', 'Kings', 'Kern']
+my_pal = {'Butte' : cm.OrRd_r(norm(median_yield_change_2050[0,1])), 'Colusa': cm.OrRd_r(norm(median_yield_change_2050[1,1])), 'Fresno' : cm.OrRd_r(norm(median_yield_change_2050[2,1])), 'Glenn' : cm.OrRd_r(norm(median_yield_change_2050[3,1])),
+          'Kern' : cm.OrRd_r(norm(median_yield_change_2050[4,1])), 'Kings' : cm.OrRd_r(norm(median_yield_change_2050[5,1])), 'Madera' : cm.OrRd_r(norm(median_yield_change_2050[6,1])), 'Merced' : cm.OrRd_r(norm(median_yield_change_2050[7,1])),
+          'San Joaquin' : cm.OrRd_r(norm(median_yield_change_2050[8,1])), 'Solano' : cm.OrRd_r(norm(median_yield_change_2050[9,1])), 'Stanislaus' : cm.OrRd_r(norm(median_yield_change_2050[10,1])), 'Sutter' : cm.OrRd_r(norm(median_yield_change_2050[11,1])),
+          'Tehama' :cm.OrRd_r(norm(median_yield_change_2050[12,1])), 'Tulare' : cm.OrRd_r(norm(median_yield_change_2050[13,1])), 'Yolo' : cm.OrRd_r(norm(median_yield_change_2050[14,1])), 'Yuba': cm.OrRd_r(norm(median_yield_change_2050[15,1]))}
+plt.subplot(1,2,2)
+ax1 = sns.boxplot(ax = axes[1],x = 'Yield Change % by 2050', y = 'County', data = df_county_yield_rcp45,  order = county_order_N_S, palette = my_pal, showfliers = False)
+plt.suptitle('County-level Yield Change % w/o Tech by Mid of the Century under RCP 4.5', fontsize = 35)
+plt.xlabel('Yield Change %', fontsize = 35)
+plt.ylabel('')
+plt.xticks(fontsize = 25)
+ticks_county_order_N_S = ['[1]Tehama', '[2]Butte', '[3]Glenn', '[4]Yuba', '[5]Colusa', '[6]Sutter', '[7]Yolo', '[8]Solano', '[9]San Joaquin', '[10]Stanislaus', '[11]Madera', '[12]Merced', '[13]Fresno', '[14]Tulare', '[15]Kings', '[16]Kern']
+plt.yticks(np.arange(0,16), ticks_county_order_N_S, fontsize = 25)
+plt.xlim(-105,50)
+plt.tight_layout()
+plt.savefig('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/Almond_plots/plot_hnrg/almond-land-avg/Growth_stage_ACI_6_19/map_yield_change_rcp45_2050.png', dpi = 200)
+
+fig, axes = plt.subplots(1,2, figsize=(30,12))
+plt.subplot(1,2,1)
+ax = ca_merge_rcp85_2050.plot(ax = axes[0], column = ca_merge_rcp85_2050.rcp85_2050,edgecolor='black',missing_kwds={'color': 'white'}, legend = True, cmap = 'OrRd_r',figsize = (15,15), vmin = -100, vmax = 0)
+fig1 = ax.figure
+fig1.axes[2].tick_params(labelsize = 30)
+ax.set_axis_off()
+fig = ax.figure
+cb_ax = fig.axes[1]
+cb_ax.tick_params(labelsize = 30)
+ca_county_remove_shp['coords'] = ca_county_remove_shp['geometry'].apply(lambda x: x.representative_point().coords[:])
+ca_county_remove_shp['coords'] = [coords[0] for coords in ca_county_remove_shp['coords']]
+for idx, row in ca_county_remove_shp.iterrows():
+   plt.annotate(row['N_S_order'], xy=row['coords'], horizontalalignment='center', color='black', fontsize =20)
+my_pal = {'Butte' : cm.OrRd_r(norm(median_yield_change_2050[0,3])), 'Colusa': cm.OrRd_r(norm(median_yield_change_2050[1,3])), 'Fresno' : cm.OrRd_r(norm(median_yield_change_2050[2,3])), 'Glenn' : cm.OrRd_r(norm(median_yield_change_2050[3,3])),
+          'Kern' : cm.OrRd_r(norm(median_yield_change_2050[4,3])), 'Kings' : cm.OrRd_r(norm(median_yield_change_2050[5,3])), 'Madera' : cm.OrRd_r(norm(median_yield_change_2050[6,3])), 'Merced' : cm.OrRd_r(norm(median_yield_change_2050[7,3])),
+          'San Joaquin' : cm.OrRd_r(norm(median_yield_change_2050[8,3])), 'Solano' : cm.OrRd_r(norm(median_yield_change_2050[9,3])), 'Stanislaus' : cm.OrRd_r(norm(median_yield_change_2050[10,3])), 'Sutter' : cm.OrRd_r(norm(median_yield_change_2050[11,3])),
+          'Tehama' :cm.OrRd_r(norm(median_yield_change_2050[12,3])), 'Tulare' : cm.OrRd_r(norm(median_yield_change_2050[13,3])), 'Yolo' : cm.OrRd_r(norm(median_yield_change_2050[14,3])), 'Yuba': cm.OrRd_r(norm(median_yield_change_2050[15,3]))}
+plt.subplot(1,2,2)
+ax1 = sns.boxplot(ax = axes[1], x = 'Yield Change % by 2050', y = 'County', data = df_county_yield_rcp85, order = county_order_N_S, palette = my_pal, showfliers = False)
+plt.suptitle('County-level Yield Change % w/o Tech by Mid of the Century under RCP 8.5', fontsize = 35)
+plt.xlabel('Yield Change %', fontsize = 35)
+plt.ylabel('')
+plt.xticks(fontsize = 25)
+plt.xlim(-105,50)
+ticks_county_order_N_S = ['[1]Tehama', '[2]Butte', '[3]Glenn', '[4]Yuba', '[5]Colusa', '[6]Sutter', '[7]Yolo', '[8]Solano', '[9]San Joaquin', '[10]Stanislaus', '[11]Madera', '[12]Merced', '[13]Fresno', '[14]Tulare', '[15]Kings', '[16]Kern']
+plt.yticks(np.arange(0,16), ticks_county_order_N_S, fontsize = 25)
+plt.tight_layout()
+plt.savefig('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/Almond_plots/plot_hnrg/almond-land-avg/Growth_stage_ACI_6_19/map_yield_change_rcp85_2050.png', dpi = 200)
+
+from matplotlib import cm
+cmap = cm.OrRd_r
+norm = matplotlib.colors.Normalize(vmax = 0,vmin = -88)
+my_cmap = plt.cm.OrRd_r(np.arange(plt.cm.OrRd_r.N))
+my_cmap[:,0:3] *= 0.93
+my_cmap = ListedColormap(my_cmap)
+from matplotlib.colors import ListedColormap
+
+yield_change_for_shp_45_2099_df = pd.DataFrame({'NAME' : ca.NAME, 'rcp45_2099' : yield_change_for_shp_45_2099})
+yield_change_for_shp_85_2099_df = pd.DataFrame({'NAME' : ca.NAME, 'rcp85_2099' : yield_change_for_shp_85_2099})
+ca_merge_rcp45_2099 =  ca.merge(yield_change_for_shp_45_2099_df, on = 'NAME')
+ca_merge_rcp85_2099 =  ca.merge(yield_change_for_shp_85_2099_df, on = 'NAME')
+df_county_yield_rcp45 = pd.DataFrame()
+df_county_yield_rcp85 = pd.DataFrame()
+
+for i in range(0,16):
+    df_county_yield_rcp45_ind = pd.DataFrame({'County' : str(county_list[i]) , 'Yield Change % by 2099' : locals()[str(county_list[i])+'county_yield_change_2099'][:,1]})
+    df_county_yield_rcp45 = df_county_yield_rcp45.append(df_county_yield_rcp45_ind)
+    df_county_yield_rcp85_ind = pd.DataFrame({'County' : str(county_list[i]) , 'Yield Change % by 2099' : locals()[str(county_list[i])+'county_yield_change_2099'][:,3]})
+    df_county_yield_rcp85 = df_county_yield_rcp85.append(df_county_yield_rcp85_ind)
+fig, axes = plt.subplots(1,2, figsize=(30,12))
+plt.subplot(1,2,1)
+ax = ca_merge_rcp45_2099.plot(ax = axes[0], column = ca_merge_rcp45_2099.rcp45_2099,edgecolor='black',missing_kwds={'color': 'white'}, legend = True, cmap = my_cmap, figsize = (15,15),vmin = -100, vmax = 0)
+fig1 = ax.figure
+fig1.axes[2].tick_params(labelsize = 30)
+ax.set_axis_off()
+fig = ax.figure
+#cb_ax = fig.axes[1]
+#cb_ax.tick_params(labelsize = 30)
+#ca_county_remove_shp['coords'] = ca_county_remove_shp['geometry'].apply(lambda x: x.representative_point().coords[:])
+#ca_county_remove_shp['coords'] = [coords[0] for coords in ca_county_remove_shp['coords']]
+#for idx, row in ca_county_remove_shp.iterrows():
+#   plt.annotate(row['N_S_order'], xy=row['coords'], horizontalalignment='center', color='black', fontsize =20)
+county_order_N_S = ['Tehama', 'Butte', 'Glenn', 'Yuba', 'Colusa', 'Sutter', 'Yolo', 'Solano', 'San Joaquin', 'Stanislaus', 'Madera', 'Merced', 'Fresno', 'Tulare', 'Kings', 'Kern']
+my_pal = {'Butte' : cm.OrRd_r(norm(median_yield_change_2099[0,1])), 'Colusa': cm.OrRd_r(norm(median_yield_change_2099[1,1])), 'Fresno' : cm.OrRd_r(norm(median_yield_change_2099[2,1])), 'Glenn' : cm.OrRd_r(norm(median_yield_change_2099[3,1])),
+          'Kern' : cm.OrRd_r(norm(median_yield_change_2099[4,1])), 'Kings' : cm.OrRd_r(norm(median_yield_change_2099[5,1])), 'Madera' : cm.OrRd_r(norm(median_yield_change_2099[6,1])), 'Merced' : cm.OrRd_r(norm(median_yield_change_2099[7,1])),
+          'San Joaquin' : cm.OrRd_r(norm(median_yield_change_2099[8,1])), 'Solano' : cm.OrRd_r(norm(median_yield_change_2099[9,1])), 'Stanislaus' : cm.OrRd_r(norm(median_yield_change_2099[10,1])), 'Sutter' : cm.OrRd_r(norm(median_yield_change_2099[11,1])),
+          'Tehama' :cm.OrRd_r(norm(median_yield_change_2099[12,1])), 'Tulare' : cm.OrRd_r(norm(median_yield_change_2099[13,1])), 'Yolo' : cm.OrRd_r(norm(median_yield_change_2099[14,1])), 'Yuba': cm.OrRd_r(norm(median_yield_change_2099[15,1]))}
+plt.subplot(1,2,2)
+ax1 = sns.boxplot(ax = axes[1],x = 'Yield Change % by 2099', y = 'County', data = df_county_yield_rcp45,  order = county_order_N_S, palette = my_pal, showfliers = False)
+plt.suptitle('County-level Yield Change % w/o Tech by End of the Century under RCP 4.5', fontsize = 35)
+plt.xlabel('Yield Change %', fontsize = 35)
+plt.ylabel('')
+plt.xticks(fontsize = 25)
+ticks_county_order_N_S = ['[1]Tehama', '[2]Butte', '[3]Glenn', '[4]Yuba', '[5]Colusa', '[6]Sutter', '[7]Yolo', '[8]Solano', '[9]San Joaquin', '[10]Stanislaus', '[11]Madera', '[12]Merced', '[13]Fresno', '[14]Tulare', '[15]Kings', '[16]Kern']
+plt.yticks(np.arange(0,16), ticks_county_order_N_S, fontsize = 25)
+plt.xlim(-105,50)
+plt.axvline(x=-100, linestyle = 'dashed', color = 'r')
+plt.axvline(x=0, linestyle = 'dashed', color = 'r')
+plt.tight_layout()
+plt.savefig('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/Almond_plots/plot_hnrg/almond-land-avg/Growth_stage_ACI_6_19/map_yield_change_rcp45_2099.png', dpi = 200)
+
+norm = matplotlib.colors.Normalize(vmax = 0,vmin = -97)
+fig, axes = plt.subplots(1,2, figsize=(30,12))
+plt.subplot(1,2,1)
+ax = ca_merge_rcp85_2099.plot(ax = axes[0], column = ca_merge_rcp85_2099.rcp85_2099,edgecolor='black',missing_kwds={'color': 'white'}, legend = True, cmap = my_cmap,figsize = (15,15), vmin = -100, vmax = 0)
+fig1 = ax.figure
+fig1.axes[2].tick_params(labelsize = 30)
+ax.set_axis_off()
+fig = ax.figure
+#cb_ax = fig.axes[1]
+#cb_ax.tick_params(labelsize = 30)
+#ca_county_remove_shp['coords'] = ca_county_remove_shp['geometry'].apply(lambda x: x.representative_point().coords[:])
+#ca_county_remove_shp['coords'] = [coords[0] for coords in ca_county_remove_shp['coords']]
+#for idx, row in ca_county_remove_shp.iterrows():
+#   plt.annotate(row['N_S_order'], xy=row['coords'], horizontalalignment='center', color='black', fontsize =20)
+my_pal = {'Butte' : cm.OrRd_r(norm(median_yield_change_2099[0,3])), 'Colusa': cm.OrRd_r(norm(median_yield_change_2099[1,3])), 'Fresno' : cm.OrRd_r(norm(median_yield_change_2099[2,3])), 'Glenn' : cm.OrRd_r(norm(median_yield_change_2099[3,3])),
+          'Kern' : cm.OrRd_r(norm(median_yield_change_2099[4,3])), 'Kings' : cm.OrRd_r(norm(median_yield_change_2099[5,3])), 'Madera' : cm.OrRd_r(norm(median_yield_change_2099[6,3])), 'Merced' : cm.OrRd_r(norm(median_yield_change_2099[7,3])),
+          'San Joaquin' : cm.OrRd_r(norm(median_yield_change_2099[8,3])), 'Solano' : cm.OrRd_r(norm(median_yield_change_2099[9,3])), 'Stanislaus' : cm.OrRd_r(norm(median_yield_change_2099[10,3])), 'Sutter' : cm.OrRd_r(norm(median_yield_change_2099[11,3])),
+          'Tehama' :cm.OrRd_r(norm(median_yield_change_2099[12,3])), 'Tulare' : cm.OrRd_r(norm(median_yield_change_2099[13,3])), 'Yolo' : cm.OrRd_r(norm(median_yield_change_2099[14,3])), 'Yuba': cm.OrRd_r(norm(median_yield_change_2099[15,3]))}
+plt.subplot(1,2,2)
+ax1 = sns.boxplot(ax = axes[1], x = 'Yield Change % by 2099', y = 'County', data = df_county_yield_rcp85, order = county_order_N_S, palette = my_pal, showfliers = False)
+plt.suptitle('County-level Yield Change % w/o Tech by End of the Century under RCP 8.5', fontsize = 35)
+plt.xlabel('Yield Change %', fontsize = 35)
+plt.ylabel('')
+plt.xticks(fontsize = 25)
+ticks_county_order_N_S = ['[1]Tehama', '[2]Butte', '[3]Glenn', '[4]Yuba', '[5]Colusa', '[6]Sutter', '[7]Yolo', '[8]Solano', '[9]San Joaquin', '[10]Stanislaus', '[11]Madera', '[12]Merced', '[13]Fresno', '[14]Tulare', '[15]Kings', '[16]Kern']
+plt.yticks(np.arange(0,16), ticks_county_order_N_S, fontsize = 25)
+plt.xlim(-105,50)
+plt.axvline(x=-100, linestyle = 'dashed', color = 'r')
+plt.axvline(x=0, linestyle = 'dashed', color = 'r')
+plt.tight_layout()
+plt.savefig('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/Almond_plots/plot_hnrg/almond-land-avg/Growth_stage_ACI_6_19/map_yield_change_rcp85_2099.png', dpi = 200)
+
+## map tech change, rcp45, rcp 85 2099
+fig, axes = plt.subplots(1,3, figsize=(45,12))
+plt.subplot(1,3,1)
+ax = ca_merge_rcp45_2090_tech.plot(ax = axes[0], column = ca_merge_rcp45_2090_tech.rcp45_2090,edgecolor='black',missing_kwds={'color': 'grey'}, legend = True, cmap = 'Purples', figsize = (15,15))
+fig1 = ax.figure
+ax.set_axis_off()
+plt.subplot(1,3,2)
+ax = ca_merge_rcp85_2099.plot(ax = axes[1], column = ca_merge_rcp45_2099.rcp45_2099,edgecolor='black',missing_kwds={'color': 'grey'}, legend = True, cmap = 'OrRd_r', figsize = (15,15),vmin = -100, vmax = 0)
+fig2 = ax.figure
+ax.set_axis_off()
+plt.subplot(1,3,3)
+ax = ca_merge_rcp85_2099.plot(ax = axes[2], column = ca_merge_rcp85_2099.rcp85_2099,edgecolor='black',missing_kwds={'color': 'grey'}, legend = True, cmap = 'OrRd_r', figsize = (15,15),vmin = -100, vmax = 0)
+fig3 = ax.figure
+fig3.axes[3].tick_params(labelsize = 30)
+fig3.axes[4].tick_params(labelsize = 30)
+fig3.axes[5].tick_params(labelsize = 30)
+ax.set_axis_off()
+plt.savefig('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/Almond_plots/plot_hnrg/almond-land-avg/Growth_stage_ACI_6_19/map_change_2099.png', dpi = 200)
+
+
+
+
+R2_test_sum = np.zeros((1000))
+for i in range(1,1001):
+    R2_test_sum[i-1] = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/data_6_19/score_test_'+str(i)+'.csv', delimiter = ',')
+
+R2_train_sum = np.zeros((1000))
+for i in range(1,1001):
+    R2_train_sum[i-1] = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/data_6_19/score_train_'+str(i)+'.csv', delimiter = ',')
+
+R2_total_sum = np.zeros((1000))
+for i in range(1,1001):
+    R2_total_sum[i-1] = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/data_6_19/score_'+str(i)+'.csv', delimiter = ',')
+    
+R2 = np.column_stack((R2_train_sum, R2_test_sum))
+labels = ['training set', 'testing set']
+colors = ['yellow', 'goldenrod']
+fig, (ax0,ax1,ax2) = plt.subplots(1,3,gridspec_kw={'width_ratios': [1,2,2]}, figsize = (35,12))
+plt.suptitle('Statiscal model (Lasso) performance', fontsize = 35)
+box = ax0.boxplot(R2, patch_artist= True, labels = labels, boxprops={'linewidth' : 2}, whiskerprops={'linewidth' : 3},capprops={'linewidth' : 3}, medianprops={'color' : 'black', 'linewidth' : 3}, widths = 0.7,showfliers=False)
+ax0.set_ylabel(r'$R^2$', fontsize=35)
+ax0.tick_params(axis='y', which='major', labelsize=35)
+ax0.tick_params(axis='x', which='major', labelsize=35, rotation = 60)
+for patch, color in zip(box['boxes'], colors):
+    patch.set_facecolor(color)
+    patch.set(linewidth = 2)
+ax1 = plt.subplot(1,3,2)
+ax1.plot(np.arange(1980,2021,1),yield_observed_state[0:41], label = 'Actual Yield',linewidth = 4, color = 'green')
+t = np.arange(1980,2021)
+tsplot(t,np.transpose(yield_gridmet_state[0:41]), color = 'darkorange')
+plt.plot(np.arange(1980,2021,1),np.median(yield_gridmet_state[0:41],axis=1), label = 'GridMet-modeled median', color = 'darkorange', linestyle = 'solid')
+plt.xticks(np.arange(1980,2021,4),np.arange(1980,2021,4), fontsize = 35, rotation = 60)
+plt.yticks(fontsize = 35)
+plt.ylim(0,1.6)
+plt.xlim(1980,2021)
+plt.ylabel('Yield ton/acre', fontsize = 35)
+darkorange_patch = mpatches.Patch(color = 'darkorange',label = 'GridMet')
+plt.legend(handles = [darkorange_patch, Line2D([0], [0], color='green', lw=4, label='Observed')],loc = 'upper left', fontsize = 35)
+#plt.title('CA area-weighted almond yield', fontsize = 35, x = 1)
+box_legend = np.zeros((1000,3))
+box_legend[:,0] = np.random.normal(1.45,0.06,size = (1000))
+box_legend[:,1] = box_legend[:,0]
+box_legend[:,2] = box_legend[:,0]
+tsplot(np.arange(1997,2000), box_legend,color = 'darkorange')
+plt.text(x = 2000,y = 1.31, s='95% CI', fontsize = 28)
+plt.text(x = 2000,y = 1.37, s='67% CI', fontsize = 28)
+plt.text(x = 2000,y = 1.43, s='Median', fontsize = 28)
+plt.plot(np.arange(1997,2000),np.median(box_legend,axis=0), color = 'darkorange', linestyle = 'solid', linewidth = 4)
+ax2 = plt.subplot(1,3,3)
+ax2.plot(np.arange(1980,2021), np.median(yield_all_hist_rcp45, axis=1) , color = 'black', linewidth =4)
+tsplot(np.arange(1980,2021), np.transpose(yield_all_hist_rcp45) , color = 'grey')
+ax2.plot(np.arange(1980,2021,1),yield_observed_state[0:41], label = 'Actual Yield',linewidth = 4, color = 'green')
+plt.xticks(np.arange(1980,2021,4),np.arange(1980,2021,4), fontsize = 35, rotation = 60)
+plt.yticks(fontsize = 35)
+plt.ylim(0,1.6)
+grey_patch = mpatches.Patch(color = 'grey',label = 'MACA-RCP4.5')
+plt.legend(handles = [grey_patch, Line2D([0], [0], color='green', lw=4, label='Observed')],loc = 'upper left', fontsize = 35)
+box_legend = np.zeros((1000,3))
+box_legend[:,0] = np.random.normal(1.45,0.06,size = (1000))
+box_legend[:,1] = box_legend[:,0]
+box_legend[:,2] = box_legend[:,0]
+tsplot(np.arange(2000,2003), box_legend,color = 'grey')
+plt.text(x = 2003,y = 1.31, s='95% CI', fontsize = 28)
+plt.text(x = 2003,y = 1.37, s='67% CI', fontsize = 28)
+plt.text(x = 2003,y = 1.43, s='Median', fontsize = 28)
+plt.plot(np.arange(2000,2003),np.median(box_legend,axis=0), color = 'black', linestyle = 'solid', linewidth = 4)
+plt.ylabel('Yield ton/acre', fontsize = 35)
+plt.xlim(1980,2021)
+plt.tight_layout()
+plt.savefig('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/Almond_plots/plot_hnrg/almond-land-avg/Growth_stage_ACI_6_19/lasso_performance.png', dpi = 200)
+
+
+
+
+##aci contribution table
+import dataframe_image as dfi
+def style_negative(v, props=''):
+    return props if v < 0 else None
+df = pd.DataFrame(aci_contribution_rcp45_county_2050_change_percent_median, columns = ACI_list, index = county_list)
+df = df.style.set_table_styles([{'selector' : '','props' : [('border','2px solid black')]},{'selector': 'td', 'props': 'text-align: center; font-weight: bold;'}]).applymap(style_negative, props='color:red;').set_table_styles([{'selector': 'th', 'props': [('font-size', '10pt'),('border-style', 'solid'),('border-width', '1px'),('border-color', 'black')]}]).set_table_styles([{'selector': 'td', 'props': [('font-size', '10pt'),('border-style', 'solid'),('border-width', '1px'),('border-color', 'black')]}]).set_caption('ACI Contribution % by 2050-RCP4.5').set_table_styles([{'selector': 'caption','props': [('fontweight', 'bold'),('font-size', '24px')]}])
+
+dfi.export(df,"C:/Users/Pancake/Box/mytable.png")
+
+
+
+
+## plot autogluon 
+AG_rcp45_tech_2010_sum_2axis = AG_rcp45_tech_2010_sum.reshape(1700,120)
+AG_rcp45_tech_2010_sum_s_2axis = AG_rcp45_tech_2010_sum_s.reshape(1700,120)
+AG_rcp85_tech_2010_sum_2axis = AG_rcp85_tech_2010_sum.reshape(1700,120)
+AG_rcp85_tech_2010_sum_s_2axis = AG_rcp85_tech_2010_sum_s.reshape(1700,120)
+AG_rcp45_to_2020_sum_2axis = AG_rcp45_to_2020_sum.reshape(1700,120)
+AG_rcp45_to_2020_sum_s_2axis = AG_rcp45_to_2020_sum_s.reshape(1700,120)
+AG_rcp85_to_2020_sum_2axis = AG_rcp85_to_2020_sum.reshape(1700,120)
+AG_rcp85_to_2020_sum_s_2axis = AG_rcp85_to_2020_sum_s.reshape(1700,120)
+
+
+AG_rcp45_tech_2010 = pd.DataFrame()
+AG_rcp45_tech_2010['year'] = np.arange(1980,2100)
+AG_rcp45_tech_2010['2.5'] = np.percentile(AG_rcp45_tech_2010_sum_2axis, 2.5,axis=0)
+AG_rcp45_tech_2010['97.5'] = np.percentile(AG_rcp45_tech_2010_sum_2axis, 97.5,axis=0)
+AG_rcp45_tech_2010['16.5'] = np.percentile(AG_rcp45_tech_2010_sum_2axis, 16.5,axis=0)
+AG_rcp45_tech_2010['83.5'] = np.percentile(AG_rcp45_tech_2010_sum_2axis, 83.5,axis=0)
+
+AG_rcp45_tech_2010_s = pd.DataFrame()
+AG_rcp45_tech_2010_s['year'] = np.arange(1980,2100)
+AG_rcp45_tech_2010_s['2.5'] = np.percentile(AG_rcp45_tech_2010_sum_s_2axis, 2.5,axis=0)
+AG_rcp45_tech_2010_s['97.5'] = np.percentile(AG_rcp45_tech_2010_sum_s_2axis, 97.5,axis=0)
+AG_rcp45_tech_2010_s['16.5'] = np.percentile(AG_rcp45_tech_2010_sum_s_2axis, 16.5,axis=0)
+AG_rcp45_tech_2010_s['83.5'] = np.percentile(AG_rcp45_tech_2010_sum_s_2axis, 83.5,axis=0)
+
+AG_rcp85_tech_2010 = pd.DataFrame()
+AG_rcp85_tech_2010_s['year'] = np.arange(1980,2100)
+AG_rcp85_tech_2010['2.5'] = np.percentile(AG_rcp85_tech_2010_sum_2axis, 2.5,axis=0)
+AG_rcp85_tech_2010['97.5'] = np.percentile(AG_rcp85_tech_2010_sum_2axis, 97.5,axis=0)
+AG_rcp85_tech_2010['16.5'] = np.percentile(AG_rcp85_tech_2010_sum_2axis, 16.5,axis=0)
+AG_rcp85_tech_2010['83.5'] = np.percentile(AG_rcp85_tech_2010_sum_2axis, 83.5,axis=0)
+
+AG_rcp85_tech_2010_s = pd.DataFrame()
+AG_rcp85_tech_2010_s['year'] = np.arange(1980,2100)
+AG_rcp85_tech_2010_s['2.5'] = np.percentile(AG_rcp85_tech_2010_sum_s_2axis, 2.5,axis=0)
+AG_rcp85_tech_2010_s['97.5'] = np.percentile(AG_rcp85_tech_2010_sum_s_2axis, 97.5,axis=0)
+AG_rcp85_tech_2010_s['16.5'] = np.percentile(AG_rcp85_tech_2010_sum_s_2axis, 16.5,axis=0)
+AG_rcp85_tech_2010_s['83.5'] = np.percentile(AG_rcp85_tech_2010_sum_s_2axis, 83.5,axis=0)
+
+
+AG_rcp45_to_2020 = pd.DataFrame()
+AG_rcp45_to_2020['year'] = np.arange(1980,2100)
+AG_rcp45_to_2020['2.5'] = np.percentile(AG_rcp45_to_2020_sum_2axis, 2.5,axis=0)
+AG_rcp45_to_2020['97.5'] = np.percentile(AG_rcp45_to_2020_sum_2axis, 97.5,axis=0)
+AG_rcp45_to_2020['16.5'] = np.percentile(AG_rcp45_to_2020_sum_2axis, 16.5,axis=0)
+AG_rcp45_to_2020['83.5'] = np.percentile(AG_rcp45_to_2020_sum_2axis, 83.5,axis=0)
+
+AG_rcp45_to_2020_s = pd.DataFrame()
+AG_rcp45_to_2020_s['year'] = np.arange(1980,2100)
+AG_rcp45_to_2020_s['2.5'] = np.percentile(AG_rcp45_to_2020_sum_s_2axis, 2.5,axis=0)
+AG_rcp45_to_2020_s['97.5'] = np.percentile(AG_rcp45_to_2020_sum_s_2axis, 97.5,axis=0)
+AG_rcp45_to_2020_s['16.5'] = np.percentile(AG_rcp45_to_2020_sum_s_2axis, 16.5,axis=0)
+AG_rcp45_to_2020_s['83.5'] = np.percentile(AG_rcp45_to_2020_sum_s_2axis, 83.5,axis=0)
+
+AG_rcp85_to_2020 = pd.DataFrame()
+AG_rcp85_to_2020['year'] = np.arange(1980,2100)
+AG_rcp85_to_2020['2.5'] = np.percentile(AG_rcp85_to_2020_sum_2axis, 2.5,axis=0)
+AG_rcp85_to_2020['97.5'] = np.percentile(AG_rcp85_to_2020_sum_2axis, 97.5,axis=0)
+AG_rcp85_to_2020['16.5'] = np.percentile(AG_rcp85_to_2020_sum_2axis, 16.5,axis=0)
+AG_rcp85_to_2020['83.5'] = np.percentile(AG_rcp85_to_2020_sum_2axis, 83.5,axis=0)
+
+AG_rcp85_to_2020_s = pd.DataFrame()
+AG_rcp85_to_2020_s['year'] = np.arange(1980,2100)
+AG_rcp85_to_2020_s['2.5'] = np.percentile(AG_rcp85_to_2020_sum_s_2axis, 2.5,axis=0)
+AG_rcp85_to_2020_s['97.5'] = np.percentile(AG_rcp85_to_2020_sum_s_2axis, 97.5,axis=0)
+AG_rcp85_to_2020_s['16.5'] = np.percentile(AG_rcp85_to_2020_sum_s_2axis, 16.5,axis=0)
+AG_rcp85_to_2020_s['83.5'] = np.percentile(AG_rcp85_to_2020_sum_s_2axis, 83.5,axis=0)
+
+plt.figure(figsize = (36,14))
+plt.subplot(1,2,1)
+plt.plot(np.arange(1980,2100),np.median(AG_rcp45_to_2020_sum_2axis, axis =0), color = 'black', linewidth = 5.5)
+plt.plot(np.arange(1980,2100),np.median(AG_rcp45_to_2020_sum_2axis, axis =0), color = 'deepskyblue', linewidth = 4)
+plt.fill_between(x = 'year', y1 = '2.5', y2 = '97.5',data = AG_rcp45_to_2020, color = 'lightskyblue', alpha = 0.5)
+plt.fill_between(x = 'year', y1 = '16.5', y2 = '83.5',data = AG_rcp45_to_2020, color = 'deepskyblue', alpha = 0.5)
+plt.plot(np.arange(1980,2100),np.median(AG_rcp45_to_2020_sum_s_2axis, axis =0), color = 'black', linewidth = 5.5)
+plt.plot(np.arange(1980,2100),np.median(AG_rcp45_to_2020_sum_s_2axis, axis =0), color = 'red', linewidth = 4)
+plt.fill_between(x = 'year', y1 = '2.5', y2 = '97.5',data = AG_rcp45_to_2020_s, color = 'lightcoral', alpha = 0.5)
+plt.fill_between(x = 'year', y1 = '16.5', y2 = '83.5',data = AG_rcp45_to_2020_s, color = 'red', alpha = 0.5)
+plt.fill_between(x = 'year', y1 = '2.5', y2 = '97.5',data = AG_rcp45_to_2020.loc[AG_rcp45_to_2020['year']<2021], color = 'lightgray', alpha = 0.5)
+plt.fill_between(x = 'year', y1 = '16.5', y2 = '83.5',data = AG_rcp45_to_2020.loc[AG_rcp45_to_2020['year']<2021], color = 'gray', alpha = 0.5)
+plt.plot(np.arange(1980,2021),np.median(AG_rcp45_to_2020_sum_2axis[:,0:41], axis =0), color = 'black', linewidth = 5.5)
+plt.ylim(0.3,2.4)
+plt.xticks(fontsize = 35)
+plt.yticks(fontsize = 35)
+plt.title('RCP 4.5', fontsize = 35)
+
+plt.subplot(1,2,2)
+plt.plot(np.arange(1980,2100),np.median(AG_rcp85_to_2020_sum_2axis, axis =0), color = 'black', linewidth = 5.5)
+plt.plot(np.arange(1980,2100),np.median(AG_rcp85_to_2020_sum_2axis, axis =0), color = 'deepskyblue', linewidth = 4)
+plt.fill_between(x = 'year', y1 = '2.5', y2 = '97.5',data = AG_rcp85_to_2020, color = 'lightskyblue', alpha = 0.5)
+plt.fill_between(x = 'year', y1 = '16.5', y2 = '83.5',data = AG_rcp85_to_2020, color = 'deepskyblue', alpha = 0.5)
+plt.plot(np.arange(1980,2100),np.median(AG_rcp85_to_2020_sum_s_2axis, axis =0), color = 'black', linewidth = 5.5)
+plt.plot(np.arange(1980,2100),np.median(AG_rcp85_to_2020_sum_s_2axis, axis =0), color = 'red', linewidth = 4)
+plt.fill_between(x = 'year', y1 = '2.5', y2 = '97.5',data = AG_rcp85_to_2020_s, color = 'lightcoral', alpha = 0.5)
+plt.fill_between(x = 'year', y1 = '16.5', y2 = '83.5',data = AG_rcp85_to_2020_s, color = 'red', alpha = 0.5)
+plt.fill_between(x = 'year', y1 = '2.5', y2 = '97.5',data = AG_rcp85_to_2020.loc[AG_rcp85_to_2020['year']<2021], color = 'lightgray', alpha = 0.5)
+plt.fill_between(x = 'year', y1 = '16.5', y2 = '83.5',data = AG_rcp85_to_2020.loc[AG_rcp85_to_2020['year']<2021], color = 'gray', alpha = 0.5)
+plt.plot(np.arange(1980,2021),np.median(AG_rcp85_to_2020_sum_2axis[:,0:41], axis =0), color = 'black', linewidth = 5.5)
+plt.ylim(0.3,2.4)
+plt.xticks(fontsize = 35)
+plt.yticks(fontsize = 35)
+plt.title('RCP 8.5', fontsize = 35)
+plt.savefig('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/Almond_plots/plot_hnrg/almond-land-avg/Growth_stage_ACI_6_19/Autogluon_yield_time_series',dpi = 200)
