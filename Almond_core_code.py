@@ -2416,7 +2416,10 @@ for trial in range(0,100):
     AG_rcp85_to_2020_sum_s[:,trial,:] = np.load('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/autogluon/YLD_sum_rcp85_to_2020_s_'+str(trial+1)+'.npy')
 
 
-
+## check autogluon score
+AG_test_score = np.load('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/autogluon/score_sum_test.npy')
+AG_train_score = np.load('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/autogluon/score_sum_train.npy')
+AG_total_score = np.load('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/autogluon/score_sum_total.npy')
 
 
 
