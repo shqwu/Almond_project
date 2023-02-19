@@ -4,6 +4,7 @@
 Created on Thu Mar 31 17:03:48 2022
 
 @author: 0shqwu
+##444
 """
 import math 
 import matplotlib.pyplot as plt 
