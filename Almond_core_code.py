@@ -20,7 +20,8 @@ for i in range(1,11):
     locals()['coef'+str(i)] = np.zeros((100,aci_num*2+32))
 coef_sum = np.zeros((0,aci_num*2+32))
 for i in range(1,1001):
-    locals()['coef'+str(((i-1)//100)+1)][i%100-1] = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/data_6_19/coef_'+str(i)+'.csv', delimiter = ',')
+    print(i)
+    locals()['coef'+str(((i-1)//100)+1)][i%100-1] = genfromtxt('C:/Users/Pancake/Box/Farm_Almond_data/lasso_model/coef_'+str(i)+'.csv', delimiter = ',')
 for i in range(1,11):
     coef_sum = np.row_stack((coef_sum, locals()['coef'+str(i)]))
 #coef_sum = np.zeros((82))
@@ -43,6 +44,8 @@ ACI_list= ['Dormancy_Freeze', 'Dormancy_$T_{avg}$','Dormancy_ETo', 'Jan_P','Feb_
 ACI_list= ['Dormancy_Freeze', 'Dormancy_$T_{avg}$','Dormancy_ETo', 'Jan_P','Bloom_P', 'Bloom_ETo', 'Bloom_GDD4','Bloom_$T_{min}$','Specific Humidity','Wind Speed', 'Growing_ETo', 'Growing_T_${mean}$', 'Growing_KDD30','harvest_P']
 ACI_list = ['Dormancy_Freeze','Dormancy_ETo','Jan_Ppt','Bloom_Ppt','Bloom_Tmin' ,'Bloom_ETo', 'Bloom_GDD4','Specific_Humidity','Windy_days','Growing_ETo', 'Growing_KDD30','harvest_Ppt']
 ACI_list = ['Dormancy_Freeze','Dormancy_ETo','Jan_Ppt','Bloom_Ppt','Bloom_Tmin' ,'Bloom_ETo', 'Bloom_GDD4','Bloom_Humidity','Windy_days','Growing_ETo','GrowingGDD4', 'Growing_KDD30','harvest_Ppt']
+ACI_list = ['Dormancy_Freeze','Dormancy_ETo','Jan_Ppt','Bloom_Ppt','Bloom_Tmin' ,'Bloom_ETo', 'Bloom_GDD4','Bloom_RH','Windy_days','Growing_ETo','GrowingGDD4', 'Growing_KDD30','harvest_Ppt']
+ACI_list = ['Dormancy_Freeze','Dormancy_ETo','Jan_Ppt','Bloom_Ppt','Bloom_Tmin' ,'Bloom_ETo', 'Bloom_GDD4','Windy_days','Growing_ETo','GrowingGDD4', 'Growing_KDD30','harvest_Ppt']
 
 county_list = ['Butte', 'Colusa', 'Fresno', 'Glenn', 'Kern', 'Kings', 'Madera', 'Merced', 'San Joaquin', 'Solano', 'Stanislaus', 'Sutter', 'Tehama', 'Tulare', 'Yolo', 'Yuba']                      
 
@@ -124,8 +127,12 @@ for i in range(0,8):
         production_csv[i+33,j+1] = year_per[np.array(np.where(year_per[:,3] == county_id))[0,k], 7]
 
 ##
+yield_all_hist_rcp45 = np.load('C:/Users/Pancake/Box/Farm_Almond_data/projection/to_2020/yield_all_hist_rcp45.npy')
+yield_all_hist_rcp85 = np.load('C:/Users/Pancake/Box/Farm_Almond_data/projection/to_2020/yield_all_hist_rcp85.npy')
+yield_1980_rcp45 = np.load('C:/Users/Pancake/Box/Farm_Almond_data/projection/to_2020/yield_1980_rcp45.npy')
+yield_1980_rcp85 = np.load('C:/Users/Pancake/Box/Farm_Almond_data/projection/to_2020/yield_1980_rcp85.npy')
 area = area_csv[0:41,1:]
-gridmet = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/gugu_aci_csv_6_19.csv', delimiter = ',')
+gridmet = genfromtxt('C:/Users/Pancake/Box/Farm_Almond_data/gridmet.csv', delimiter = ',')
 simulation_gridmet = np.zeros((656, 1000))
 production_gridmet = np.zeros((656, 1000))
 for trial in range(1,11):
@@ -232,20 +239,20 @@ for trial in range(1,11):
         simulation_rcp45_s = np.zeros((656,100))
         simulation_rcp85 = np.zeros((656,100))
         simulation_rcp85_s = np.zeros((656,100))
-        aci_rcp45 = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/to_2020/'+str(model_list[model])+'hist_rcp45_ACI.csv', delimiter = ',')
-        aci_rcp45_s = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/to_2020/'+str(model_list[model])+'hist_rcp45_s_ACI.csv', delimiter = ',')
-        aci_rcp85 = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/to_2020/'+str(model_list[model])+'hist_rcp85_ACI.csv', delimiter = ',')
-        aci_rcp85_s = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/to_2020/'+str(model_list[model])+'hist_rcp85_s_ACI.csv', delimiter = ',')
+        aci_rcp45 = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/tech_2010/'+str(model_list[model])+'hist_rcp45_ACI.csv', delimiter = ',')
+        aci_rcp45_s = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/tech_2010/'+str(model_list[model])+'hist_rcp45_s_ACI.csv', delimiter = ',')
+        aci_rcp85 = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/tech_2010/'+str(model_list[model])+'hist_rcp85_ACI.csv', delimiter = ',')
+        aci_rcp85_s = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/tech_2010/'+str(model_list[model])+'hist_rcp85_s_ACI.csv', delimiter = ',')
         for i in range(0,656):
             for j in range(0,100):
                 simulation_rcp45[i,j] = np.nansum(aci_rcp45[i,:]*locals()['coef'+str(trial)][j,:])
                 simulation_rcp45_s[i,j] = np.nansum(aci_rcp45_s[i,:]*locals()['coef'+str(trial)][j,:])
                 simulation_rcp85[i,j] = np.nansum(aci_rcp85[i,:]*locals()['coef'+str(trial)][j,:])
                 simulation_rcp85_s[i,j] = np.nansum(aci_rcp85_s[i,:]*locals()['coef'+str(trial)][j,:])
-        savetxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/to_2020/'+str(model_list[model])+'_hist_prediction_'+str(trial)+'_rcp45.csv', simulation_rcp45, delimiter = ',')
-        savetxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/to_2020/'+str(model_list[model])+'_hist_prediction_'+str(trial)+'_rcp45_s.csv', simulation_rcp45_s, delimiter = ',')
-        savetxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/to_2020/'+str(model_list[model])+'_hist_prediction_'+str(trial)+'_rcp85.csv', simulation_rcp85, delimiter = ',')
-        savetxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/to_2020/'+str(model_list[model])+'_hist_prediction_'+str(trial)+'_rcp85_s.csv', simulation_rcp85_s, delimiter = ',')
+        savetxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/tech_2010/'+str(model_list[model])+'_hist_prediction_'+str(trial)+'_rcp45.csv', simulation_rcp45, delimiter = ',')
+        savetxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/tech_2010/'+str(model_list[model])+'_hist_prediction_'+str(trial)+'_rcp45_s.csv', simulation_rcp45_s, delimiter = ',')
+        savetxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/tech_2010/'+str(model_list[model])+'_hist_prediction_'+str(trial)+'_rcp85.csv', simulation_rcp85, delimiter = ',')
+        savetxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/tech_2010/'+str(model_list[model])+'_hist_prediction_'+str(trial)+'_rcp85_s.csv', simulation_rcp85_s, delimiter = ',')
 
 ##future
 for trial in range(1,11):
@@ -254,20 +261,20 @@ for trial in range(1,11):
         simulation_rcp45_s = np.zeros((1264,100))
         simulation_rcp85 = np.zeros((1264,100))
         simulation_rcp85_s = np.zeros((1264,100))
-        aci_rcp45 = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/to_2020/'+str(model_list[model])+'future_rcp45_ACI.csv', delimiter = ',')
-        aci_rcp45_s = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/to_2020/'+str(model_list[model])+'future_rcp45_s_ACI.csv', delimiter = ',')
-        aci_rcp85 = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/to_2020/'+str(model_list[model])+'future_rcp85_ACI.csv', delimiter = ',')
-        aci_rcp85_s = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/to_2020/'+str(model_list[model])+'future_rcp85_s_ACI.csv', delimiter = ',')
+        aci_rcp45 = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/tech_2010/'+str(model_list[model])+'future_rcp45_ACI.csv', delimiter = ',')
+        aci_rcp45_s = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/tech_2010/'+str(model_list[model])+'future_rcp45_s_ACI.csv', delimiter = ',')
+        aci_rcp85 = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/tech_2010/'+str(model_list[model])+'future_rcp85_ACI.csv', delimiter = ',')
+        aci_rcp85_s = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/tech_2010/'+str(model_list[model])+'future_rcp85_s_ACI.csv', delimiter = ',')
         for i in range(0,1264):
             for j in range(0,100):
                 simulation_rcp45[i,j] = np.nansum(aci_rcp45[i,:]*locals()['coef'+str(trial)][j,:])
                 simulation_rcp45_s[i,j] = np.nansum(aci_rcp45_s[i,:]*locals()['coef'+str(trial)][j,:])
                 simulation_rcp85[i,j] = np.nansum(aci_rcp85[i,:]*locals()['coef'+str(trial)][j,:])
                 simulation_rcp85_s[i,j] = np.nansum(aci_rcp85_s[i,:]*locals()['coef'+str(trial)][j,:])
-        savetxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/to_2020/'+str(model_list[model])+'_future_prediction_'+str(trial)+'_rcp45.csv', simulation_rcp45, delimiter = ',')
-        savetxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/to_2020/'+str(model_list[model])+'_future_prediction_'+str(trial)+'_rcp45_s.csv', simulation_rcp45_s, delimiter = ',')
-        savetxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/to_2020/'+str(model_list[model])+'_future_prediction_'+str(trial)+'_rcp85.csv', simulation_rcp85, delimiter = ',')
-        savetxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/to_2020/'+str(model_list[model])+'_future_prediction_'+str(trial)+'_rcp85_s.csv', simulation_rcp85_s, delimiter = ',')
+        savetxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/tech_2010/'+str(model_list[model])+'_future_prediction_'+str(trial)+'_rcp45.csv', simulation_rcp45, delimiter = ',')
+        savetxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/tech_2010/'+str(model_list[model])+'_future_prediction_'+str(trial)+'_rcp45_s.csv', simulation_rcp45_s, delimiter = ',')
+        savetxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/tech_2010/'+str(model_list[model])+'_future_prediction_'+str(trial)+'_rcp85.csv', simulation_rcp85, delimiter = ',')
+        savetxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/tech_2010/'+str(model_list[model])+'_future_prediction_'+str(trial)+'_rcp85_s.csv', simulation_rcp85_s, delimiter = ',')
 
 ## obtain aci*coef area-weighted CA
 for model in range(0,17):
@@ -344,8 +351,8 @@ for i in range(0,15):
 aci_contribution_rcp45_total = aci_contribution_rcp45_total[:,:,0:15]
 aci_contribution_rcp85_total = aci_contribution_rcp85_total[:,:,0:15]
 
-aci_contribution_rcp45_total = np.load('C:/Users/Pancake/Box/aci_contribution_5_20/aci_contribution_rcp45_total.npy')
-aci_contribution_rcp85_total = np.load('C:/Users/Pancake/Box/aci_contribution_5_20/aci_contribution_rcp85_total.npy')
+aci_contribution_rcp45_total = np.load('/Users/0shqwu/Library/CloudStorage/Box-Box/aci_contribution_5_20/aci_contribution_rcp45_total.npy')
+aci_contribution_rcp85_total = np.load('/Users/0shqwu/Library/CloudStorage/Box-Box/aci_contribution_5_20/aci_contribution_rcp85_total.npy')
 
 aci_contribution_rcp45_2001_2020 = np.mean(aci_contribution_rcp45_total[21:41,:,:], axis=0)
 aci_contribution_rcp85_2001_2020 = np.mean(aci_contribution_rcp85_total[21:41,:,:], axis=0)
@@ -546,20 +553,20 @@ plt.show()
 
 
 
-aci_contribution_rcp45_county_2050_change_percent = np.load('C:/Users/Pancake/Box/aci_contribution_5_20/aci_contribution_rcp45_county_2050_change_percent.npy')
-aci_contribution_rcp45_county_2090_change_percent = np.load('C:/Users/Pancake/Box/aci_contribution_5_20/aci_contribution_rcp45_county_2090_change_percent.npy')
-aci_contribution_rcp85_county_2050_change_percent = np.load('C:/Users/Pancake/Box/aci_contribution_5_20/aci_contribution_rcp85_county_2050_change_percent.npy')
-aci_contribution_rcp85_county_2090_change_percent = np.load('C:/Users/Pancake/Box/aci_contribution_5_20/aci_contribution_rcp85_county_2090_change_percent.npy')
+aci_contribution_rcp45_county_2050_change_percent = np.load('/Users/0shqwu/Library/CloudStorage/Box-Box/aci_contribution_5_20/aci_contribution_rcp45_county_2050_change_percent.npy')
+aci_contribution_rcp45_county_2090_change_percent = np.load('/Users/0shqwu/Library/CloudStorage/Box-Box/aci_contribution_5_20/aci_contribution_rcp45_county_2090_change_percent.npy')
+aci_contribution_rcp85_county_2050_change_percent = np.load('/Users/0shqwu/Library/CloudStorage/Box-Box/aci_contribution_5_20/aci_contribution_rcp85_county_2050_change_percent.npy')
+aci_contribution_rcp85_county_2090_change_percent = np.load('/Users/0shqwu/Library/CloudStorage/Box-Box/aci_contribution_5_20/aci_contribution_rcp85_county_2090_change_percent.npy')
 
 aci_contribution_rcp45_county_2050_change_percent_median = np.median(aci_contribution_rcp45_county_2050_change_percent, axis=1)
 aci_contribution_rcp45_county_2090_change_percent_median = np.median(aci_contribution_rcp45_county_2090_change_percent, axis=1)
 aci_contribution_rcp85_county_2050_change_percent_median = np.median(aci_contribution_rcp85_county_2050_change_percent, axis=1)
 aci_contribution_rcp85_county_2090_change_percent_median = np.median(aci_contribution_rcp85_county_2090_change_percent, axis=1)
 
-aci_contribution_rcp45_county_2050_change = np.load('C:/Users/Pancake/Box/aci_contribution_5_20/aci_contribution_rcp45_county_2050_change.npy')
-aci_contribution_rcp45_county_2090_change = np.load('C:/Users/Pancake/Box/aci_contribution_5_20/aci_contribution_rcp45_county_2090_change.npy')
-aci_contribution_rcp85_county_2050_change = np.load('C:/Users/Pancake/Box/aci_contribution_5_20/aci_contribution_rcp85_county_2050_change.npy')
-aci_contribution_rcp85_county_2090_change = np.load('C:/Users/Pancake/Box/aci_contribution_5_20/aci_contribution_rcp85_county_2090_change.npy')
+aci_contribution_rcp45_county_2050_change = np.load('/Users/0shqwu/Library/CloudStorage/Box-Box/aci_contribution_5_20/aci_contribution_rcp45_county_2050_change.npy')
+aci_contribution_rcp45_county_2090_change = np.load('/Users/0shqwu/Library/CloudStorage/Box-Box/aci_contribution_5_20/aci_contribution_rcp45_county_2090_change.npy')
+aci_contribution_rcp85_county_2050_change = np.load('/Users/0shqwu/Library/CloudStorage/Box-Box/aci_contribution_5_20/aci_contribution_rcp85_county_2050_change.npy')
+aci_contribution_rcp85_county_2090_change = np.load('/Users/0shqwu/Library/CloudStorage/Box-Box/aci_contribution_5_20/aci_contribution_rcp85_county_2090_change.npy')
 
 aci_contribution_rcp45_county_2050_change_toal = np.sum(aci_contribution_rcp45_county_2050_change, axis = 2)
 aci_contribution_rcp45_county_2090_change_toal = np.sum(aci_contribution_rcp45_county_2050_change, axis = 2)
@@ -670,7 +677,7 @@ average_model = np.zeros((656,1000))
 for model_id in range(0,17):
     locals()['model_'+str(model_id)] = np.zeros((656,0))
     for trial in range(1,11):
-        locals()[str(model_list[model_id])+str(trial)+'_hist'] = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/to_2020/'+str(model_list[model_id])+'_hist_prediction_'+str(trial)+'_rcp45.csv', delimiter=',')
+        locals()[str(model_list[model_id])+str(trial)+'_hist'] = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/tech_2010/'+str(model_list[model_id])+'_hist_prediction_'+str(trial)+'_rcp45.csv', delimiter=',')
         locals()[str(model_list[model_id])+str(trial)+'_hist'][locals()[str(model_list[model_id])+str(trial)+'_hist']<0] = 0
         yield_all_hist = np.column_stack((yield_all_hist,locals()[str(model_list[model_id])+str(trial)+'_hist']))
         locals()['model_'+str(model_id)] = np.column_stack((locals()['model_'+str(model_id)], locals()[str(model_list[model_id])+str(trial)+'_hist']))
@@ -719,7 +726,7 @@ average_model = np.zeros((656,1000))
 for model_id in range(0,17):
     locals()['model_'+str(model_id)] = np.zeros((656,0))
     for trial in range(1,11):
-        locals()[str(model_list[model_id])+str(trial)+'_hist'] = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/to_2020/'+str(model_list[model_id])+'_hist_prediction_'+str(trial)+'_rcp45_s.csv', delimiter=',')
+        locals()[str(model_list[model_id])+str(trial)+'_hist'] = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/tech_2010/'+str(model_list[model_id])+'_hist_prediction_'+str(trial)+'_rcp45_s.csv', delimiter=',')
         locals()[str(model_list[model_id])+str(trial)+'_hist'][locals()[str(model_list[model_id])+str(trial)+'_hist']<0] = 0
         yield_all_hist = np.column_stack((yield_all_hist,locals()[str(model_list[model_id])+str(trial)+'_hist']))
         locals()['model_'+str(model_id)] = np.column_stack((locals()['model_'+str(model_id)], locals()[str(model_list[model_id])+str(trial)+'_hist']))
@@ -766,7 +773,7 @@ average_model = np.zeros((656,1000))
 for model_id in range(0,17):
     locals()['model_'+str(model_id)] = np.zeros((656,0))
     for trial in range(1,11):
-        locals()[str(model_list[model_id])+str(trial)+'_hist'] = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/to_2020/'+str(model_list[model_id])+'_hist_prediction_'+str(trial)+'_rcp85.csv', delimiter=',')
+        locals()[str(model_list[model_id])+str(trial)+'_hist'] = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/tech_2010/'+str(model_list[model_id])+'_hist_prediction_'+str(trial)+'_rcp85.csv', delimiter=',')
         locals()[str(model_list[model_id])+str(trial)+'_hist'][locals()[str(model_list[model_id])+str(trial)+'_hist']<0] = 0
         yield_all_hist = np.column_stack((yield_all_hist,locals()[str(model_list[model_id])+str(trial)+'_hist']))
         locals()['model_'+str(model_id)] = np.column_stack((locals()['model_'+str(model_id)], locals()[str(model_list[model_id])+str(trial)+'_hist']))
@@ -815,7 +822,7 @@ average_model = np.zeros((656,1000))
 for model_id in range(0,17):
     locals()['model_'+str(model_id)] = np.zeros((656,0))
     for trial in range(1,11):
-        locals()[str(model_list[model_id])+str(trial)+'_hist'] = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/to_2020/'+str(model_list[model_id])+'_hist_prediction_'+str(trial)+'_rcp85_s.csv', delimiter=',')
+        locals()[str(model_list[model_id])+str(trial)+'_hist'] = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/tech_2010/'+str(model_list[model_id])+'_hist_prediction_'+str(trial)+'_rcp85_s.csv', delimiter=',')
         locals()[str(model_list[model_id])+str(trial)+'_hist'][locals()[str(model_list[model_id])+str(trial)+'_hist']<0] = 0
         yield_all_hist = np.column_stack((yield_all_hist,locals()[str(model_list[model_id])+str(trial)+'_hist']))
         locals()['model_'+str(model_id)] = np.column_stack((locals()['model_'+str(model_id)], locals()[str(model_list[model_id])+str(trial)+'_hist']))
@@ -864,7 +871,7 @@ average_model = np.zeros((1264,1000))
 for model_id in range(0,17):
     locals()['model_'+str(model_id)] = np.zeros((1264,0))
     for trial in range(1,11):
-        locals()[str(model_list[model_id])+str(trial)+'_rcp45'] = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/to_2020/'+str(model_list[model_id])+'_future_prediction_'+str(trial)+'_rcp45.csv', delimiter=',')
+        locals()[str(model_list[model_id])+str(trial)+'_rcp45'] = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/tech_2010/'+str(model_list[model_id])+'_future_prediction_'+str(trial)+'_rcp45.csv', delimiter=',')
         locals()[str(model_list[model_id])+str(trial)+'_rcp45'][locals()[str(model_list[model_id])+str(trial)+'_rcp45']<0] = 0
         yield_all = np.column_stack((yield_all,locals()[str(model_list[model_id])+str(trial)+'_rcp45']))
         locals()['model_'+str(model_id)] = np.column_stack((locals()['model_'+str(model_id)], locals()[str(model_list[model_id])+str(trial)+'_rcp45']))
@@ -909,9 +916,11 @@ for year in range(0,79):
 yield_all = np.zeros((1264,0))
 average_model = np.zeros((1264,1000))
 for model_id in range(0,17):
+    print(model_id)
     locals()['model_'+str(model_id)] = np.zeros((1264,0))
     for trial in range(1,11):
-        locals()[str(model_list[model_id])+str(trial)+'_rcp45'] = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/to_2020/'+str(model_list[model_id])+'_future_prediction_'+str(trial)+'_rcp45_s.csv', delimiter=',')
+        print(trial)
+        locals()[str(model_list[model_id])+str(trial)+'_rcp45'] = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/tech_2010/'+str(model_list[model_id])+'_future_prediction_'+str(trial)+'_rcp45_s.csv', delimiter=',')
         locals()[str(model_list[model_id])+str(trial)+'_rcp45'][locals()[str(model_list[model_id])+str(trial)+'_rcp45']<0] = 0
         yield_all = np.column_stack((yield_all,locals()[str(model_list[model_id])+str(trial)+'_rcp45']))
         locals()['model_'+str(model_id)] = np.column_stack((locals()['model_'+str(model_id)], locals()[str(model_list[model_id])+str(trial)+'_rcp45']))
@@ -957,7 +966,7 @@ average_model = np.zeros((1264,1000))
 for model_id in range(0,17):
     locals()['model_'+str(model_id)] = np.zeros((1264,0))
     for trial in range(1,11):
-        locals()[str(model_list[model_id])+str(trial)+'_rcp85'] = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/to_2020/'+str(model_list[model_id])+'_future_prediction_'+str(trial)+'_rcp85.csv', delimiter=',')
+        locals()[str(model_list[model_id])+str(trial)+'_rcp85'] = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/tech_2010/'+str(model_list[model_id])+'_future_prediction_'+str(trial)+'_rcp85.csv', delimiter=',')
         locals()[str(model_list[model_id])+str(trial)+'_rcp85'][locals()[str(model_list[model_id])+str(trial)+'_rcp85']<0] = 0
         yield_all = np.column_stack((yield_all,locals()[str(model_list[model_id])+str(trial)+'_rcp85']))
         locals()['model_'+str(model_id)] = np.column_stack((locals()['model_'+str(model_id)], locals()[str(model_list[model_id])+str(trial)+'_rcp85']))
@@ -1003,7 +1012,7 @@ average_model = np.zeros((1264,1000))
 for model_id in range(0,17):
     locals()['model_'+str(model_id)] = np.zeros((1264,0))
     for trial in range(1,11):
-        locals()[str(model_list[model_id])+str(trial)+'_rcp85'] = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/to_2020/'+str(model_list[model_id])+'_future_prediction_'+str(trial)+'_rcp85_s.csv', delimiter=',')
+        locals()[str(model_list[model_id])+str(trial)+'_rcp85'] = genfromtxt('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/MACA/ACI_csv_summary/ACI_6_19/tech_2010/'+str(model_list[model_id])+'_future_prediction_'+str(trial)+'_rcp85_s.csv', delimiter=',')
         locals()[str(model_list[model_id])+str(trial)+'_rcp85'][locals()[str(model_list[model_id])+str(trial)+'_rcp85']<0] = 0
         yield_all = np.column_stack((yield_all,locals()[str(model_list[model_id])+str(trial)+'_rcp85']))
         locals()['model_'+str(model_id)] = np.column_stack((locals()['model_'+str(model_id)], locals()[str(model_list[model_id])+str(trial)+'_rcp85']))
@@ -2397,29 +2406,405 @@ plt.savefig('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/QE-presentation/aci_cor_
 
 
 ##m load autogluon prediction
-AG_rcp45_tech_2010_sum = np.zeros((17,100,120))
-AG_rcp45_tech_2010_sum_s = np.zeros((17,100,120))
-AG_rcp85_tech_2010_sum = np.zeros((17,100,120))
-AG_rcp85_tech_2010_sum_s = np.zeros((17,100,120))
+AG_rcp45_to_2020_sum = np.zeros((17,100,120))
+AG_rcp45_to_2020_sum_s = np.zeros((17,100,120))
+AG_rcp85_to_2020_sum = np.zeros((17,100,120))
+AG_rcp85_to_2020_sum_s = np.zeros((17,100,120))
 AG_rcp45_to_2020_sum = np.zeros((17,100,120))
 AG_rcp45_to_2020_sum_s = np.zeros((17,100,120))
 AG_rcp85_to_2020_sum = np.zeros((17,100,120))
 AG_rcp85_to_2020_sum_s = np.zeros((17,100,120))
 for trial in range(0,100):
-    AG_rcp45_tech_2010_sum[:,trial,:] = np.load('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/autogluon/YLD_sum_rcp45_tech_2010_'+str(trial+1)+'.npy')
-    AG_rcp45_tech_2010_sum_s[:,trial,:] = np.load('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/autogluon/YLD_sum_rcp45_tech_2010_s_'+str(trial+1)+'.npy')
-    AG_rcp85_tech_2010_sum[:,trial,:] = np.load('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/autogluon/YLD_sum_rcp85_tech_2010_'+str(trial+1)+'.npy')
-    AG_rcp85_tech_2010_sum_s[:,trial,:] = np.load('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/autogluon/YLD_sum_rcp85_tech_2010_s_'+str(trial+1)+'.npy')
-    AG_rcp45_to_2020_sum[:,trial,:] = np.load('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/autogluon/YLD_sum_rcp45_to_2020_'+str(trial+1)+'.npy')
-    AG_rcp45_to_2020_sum_s[:,trial,:] = np.load('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/autogluon/YLD_sum_rcp45_to_2020_s_'+str(trial+1)+'.npy')
-    AG_rcp85_to_2020_sum[:,trial,:] = np.load('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/autogluon/YLD_sum_rcp85_to_2020_'+str(trial+1)+'.npy')
-    AG_rcp85_to_2020_sum_s[:,trial,:] = np.load('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/autogluon/YLD_sum_rcp85_to_2020_s_'+str(trial+1)+'.npy')
+    AG_rcp45_to_2020_sum[:,trial,:] = np.load('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/autogluon/no_square/YLD_sum_rcp45_to_2020_'+str(trial+1)+'.npy')
+    AG_rcp45_to_2020_sum_s[:,trial,:] = np.load('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/autogluon/no_square/YLD_sum_rcp45_to_2020_s_'+str(trial+1)+'.npy')
+    AG_rcp85_to_2020_sum[:,trial,:] = np.load('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/autogluon/no_square/YLD_sum_rcp85_to_2020_'+str(trial+1)+'.npy')
+    AG_rcp85_to_2020_sum_s[:,trial,:] = np.load('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/autogluon/no_square/YLD_sum_rcp85_to_2020_s_'+str(trial+1)+'.npy')
+    AG_rcp45_to_2020_sum[:,trial,:] = np.load('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/autogluon/no_square/YLD_sum_rcp45_to_2020_'+str(trial+1)+'.npy')
+    AG_rcp45_to_2020_sum_s[:,trial,:] = np.load('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/autogluon/no_square/YLD_sum_rcp45_to_2020_s_'+str(trial+1)+'.npy')
+    AG_rcp85_to_2020_sum[:,trial,:] = np.load('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/autogluon/no_square/YLD_sum_rcp85_to_2020_'+str(trial+1)+'.npy')
+    AG_rcp85_to_2020_sum_s[:,trial,:] = np.load('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/autogluon/no_square/YLD_sum_rcp85_to_2020_s_'+str(trial+1)+'.npy')
 
 
 ## check autogluon score
 AG_test_score = np.load('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/autogluon/score_sum_test.npy')
 AG_train_score = np.load('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/autogluon/score_sum_train.npy')
 AG_total_score = np.load('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/lasso_Csv/autogluon/score_sum_total.npy')
+
+
+
+## New method to compute uncertainty partitioning
+def poly_transform(X,Y):
+    poly_array = np.zeros((Y.shape[0],Y.shape[1]))
+    Y_len = Y.shape[1]
+    for i in range(Y_len):
+        Poly_fit = np.polyfit(X, Y[:,i], deg = 4)
+        Poly_func = np.poly1d(Poly_fit)
+        Poly_pred = Poly_func(X)
+        poly_array[:,i] = Poly_pred
+    return(poly_array)
+
+
+poly_X = np.arange(1980,2100)
+yield_all_sum_rcp45_s_poly = poly_transform(poly_X, yield_all_sum_rcp45_s).reshape(120,17,1000)[40:120]
+yield_all_sum_rcp85_s_poly = poly_transform(poly_X, yield_all_sum_rcp85_s).reshape(120,17,1000)[40:120]
+yield_all_sum_rcp45_poly = poly_transform(poly_X, yield_all_sum_rcp45).reshape(120,17,1000)[40:120]
+yield_all_sum_rcp85_poly = poly_transform(poly_X, yield_all_sum_rcp85).reshape(120,17,1000)[40:120]
+yield_all_sum_rcp45_2020_2099 = yield_all_sum_rcp45[40:120]
+yield_all_sum_rcp45_s_2020_2099 =  yield_all_sum_rcp45_s[40:120]
+yield_all_sum_rcp85_2020_2099 =  yield_all_sum_rcp85[40:120]
+yield_all_sum_rcp85_s_2020_2099=  yield_all_sum_rcp85_s[40:120]
+num_rcp = 2
+num_stat_model = 1000
+num_tech = 2
+num_clim_model = 17
+
+## calculate climate model uncertainty MC
+MC_rcp45 = np.zeros((80,1000))
+MC_rcp45_s = np.zeros((80,1000))
+MC_rcp85 = np.zeros((80,1000))
+MC_rcp85_s = np.zeros((80,1000)) 
+for year in range(0,80):
+    MC_rcp45[year,:] = np.var(yield_all_sum_rcp45_poly[year,:,:], axis=0)
+    MC_rcp45_s[year,:] = np.var(yield_all_sum_rcp45_s_poly[year,:,:], axis=0)
+    MC_rcp85[year,:] = np.var(yield_all_sum_rcp85_poly[year,:,:], axis=0)
+    MC_rcp85_s[year,:] = np.var(yield_all_sum_rcp85_s_poly[year,:,:], axis=0)
+        
+MC_time_series = ((MC_rcp45+MC_rcp45_s+MC_rcp85+MC_rcp85_s)/4).mean(axis=1)
+
+## calculate stat model uncertainty MS
+MS_rcp45 = np.zeros((80,17))
+MS_rcp45_s = np.zeros((80,17))
+MS_rcp85 = np.zeros((80,17))
+MS_rcp85_s = np.zeros((80,17)) 
+for year in range(0,80):
+        MS_rcp45[year,:] = np.var((yield_all_sum_rcp45_2020_2099.reshape(80,17,1000))[year,:,:], axis=1)    
+        MS_rcp45_s[year,:] = np.var((yield_all_sum_rcp45_s_2020_2099.reshape(80,17,1000))[year,:,:], axis=1)    
+        MS_rcp85[year,:] = np.var((yield_all_sum_rcp85_2020_2099.reshape(80,17,1000))[year,:,:], axis=1)    
+        MS_rcp85_s[year,:] = np.var((yield_all_sum_rcp85_s_2020_2099.reshape(80,17,1000))[year,:,:], axis=1)    
+MS_time_series = ((MS_rcp45 + MS_rcp45_s + MS_rcp85 + MS_rcp85_s)/4).mean(axis=1)
+
+## calculate tech trend scenario uncertainty ST
+yield_all_sum_rcp45_tech_scenario = np.zeros((80,17,1000,2))    
+yield_all_sum_rcp45_tech_scenario[:,:,:,0] = yield_all_sum_rcp45_2020_2099.reshape(80,17,1000)
+yield_all_sum_rcp45_tech_scenario[:,:,:,1] = yield_all_sum_rcp45_s_2020_2099.reshape(80,17,1000)
+yield_all_sum_rcp85_tech_scenario = np.zeros((80,17,1000,2))    
+yield_all_sum_rcp85_tech_scenario[:,:,:,0] = yield_all_sum_rcp85_2020_2099.reshape(80,17,1000)
+yield_all_sum_rcp85_tech_scenario[:,:,:,1] = yield_all_sum_rcp85_s_2020_2099.reshape(80,17,1000)
+
+ST_rcp45 = np.zeros((80,17,1000))
+ST_rcp85 = np.zeros((80,17,1000))
+for year in range(0,80):
+    for climate in range(0,num_clim_model):
+        for stat in range(0,num_stat_model):
+            ST_rcp45[year,climate,stat] = np.var(yield_all_sum_rcp45_tech_scenario[year,climate,stat,:])
+            ST_rcp85[year,climate,stat] = np.var(yield_all_sum_rcp85_tech_scenario[year,climate,stat,:])
+ST_time_series = ((ST_rcp45 + ST_rcp85)/2).mean(axis=1).mean(axis=1)
+
+## calculate rcp scenario uncertainty SR
+yield_all_sum_rcp_scenario_tech = np.zeros((80,17,1000,2))    
+yield_all_sum_rcp_scenario_tech[:,:,:,0] = yield_all_sum_rcp45_poly
+yield_all_sum_rcp_scenario_tech[:,:,:,1] = yield_all_sum_rcp85_poly
+yield_all_sum_rcp_scenario_no_tech = np.zeros((80,17,1000,2))    
+yield_all_sum_rcp_scenario_no_tech[:,:,:,0] = yield_all_sum_rcp45_s_poly
+yield_all_sum_rcp_scenario_no_tech[:,:,:,1] = yield_all_sum_rcp85_s_poly
+
+SR_tech = np.zeros((80,17,1000))
+SR_no_tech = np.zeros((80,17,1000))
+for year in range(0,80):
+    for climate in range(0,num_clim_model):
+        for stat in range(0,num_stat_model):
+            SR_tech[year,climate,stat] = np.var(yield_all_sum_rcp_scenario_tech[year,climate,stat,:])
+            SR_no_tech[year,climate,stat] = np.var(yield_all_sum_rcp_scenario_no_tech[year,climate,stat,:])
+SR_time_series = ((SR_tech + SR_no_tech)/2).mean(axis=1).mean(axis=1)
+
+
+## calculate internal 
+Intvar_rcp45 = np.zeros((80,1000))
+Intvar_rcp45_s = np.zeros((80,1000))
+Intvar_rcp85 = np.zeros((80,1000))
+Intvar_rcp85_s = np.zeros((80,1000))
+residual_rcp45 = np.zeros((80,17,1000))
+residual_rcp45_s = np.zeros((80,17,1000))
+residual_rcp85 = np.zeros((80,17,1000))
+residual_rcp85_s = np.zeros((80,17,1000))
+
+for trial in range(0,1000):
+    for climate in range(0,17):
+        residual_rcp45[:,climate,trial] = np.array(pd.DataFrame(yield_all_sum_rcp45_poly[:,climate,trial]-yield_all_sum_rcp45_2020_2099.reshape(80,17,1000)[:,climate,trial]).rolling(10,min_periods=5, center = True).mean()).reshape(80)
+        residual_rcp45_s[:,climate,trial] = np.array(pd.DataFrame(yield_all_sum_rcp45_s_poly[:,climate,trial]-yield_all_sum_rcp45_s_2020_2099.reshape(80,17,1000)[:,climate,trial]).rolling(10,min_periods=5, center = True).mean()).reshape(80)
+        residual_rcp85[:,climate,trial] = np.array(pd.DataFrame(yield_all_sum_rcp85_poly[:,climate,trial]-yield_all_sum_rcp85_2020_2099.reshape(80,17,1000)[:,climate,trial]).rolling(10,min_periods=5, center = True).mean()).reshape(80)
+        residual_rcp85_s[:,climate,trial] = np.array(pd.DataFrame(yield_all_sum_rcp85_s_poly[:,climate,trial]-yield_all_sum_rcp85_s_2020_2099.reshape(80,17,1000)[:,climate,trial]).rolling(10,min_periods=5, center = True).mean()).reshape(80)
+
+for year in range(0,80):
+    Intvar_rcp45[year,:] = np.var(residual_rcp45[year,:,:], axis=0)
+    Intvar_rcp45_s[year,:] = np.var(residual_rcp45_s[year,:,:], axis=0)
+    Intvar_rcp85[year,:] = np.var(residual_rcp85[year,:,:], axis=0)
+    Intvar_rcp85_s[year,:] = np.var(residual_rcp85_s[year,:,:], axis=0)
+Intvar_time_series = ((Intvar_rcp45+Intvar_rcp45_s+Intvar_rcp85+Intvar_rcp85_s)/4).mean(axis=1)
+
+
+##plot percentage stacker area
+Var_total_10yr_mean = np.zeros((80,5))
+Var_total_10yr_mean[:,0] = MC_time_series
+Var_total_10yr_mean[:,1] = MS_time_series
+Var_total_10yr_mean[:,2] = ST_time_series
+Var_total_10yr_mean[:,3] = SR_time_series
+Var_total_10yr_mean[:,4] = Intvar_time_series
+for year in range(0,80):
+    Var_total_10yr_mean[year,:] = Var_total_10yr_mean[year,:] * 100 / np.sum(Var_total_10yr_mean[year,:])
+
+plt.figure(figsize = (30,13))
+plt.suptitle('Uncertainties', fontsize = 35, y = 0.95)
+plt.subplot(1,2,1)
+plt.stackplot(np.arange(2020,2100),MC_time_series,MS_time_series,ST_time_series
+              ,SR_time_series,Intvar_time_series,labels = ['Climate Model', 'Stats Model', 'Tech Scenario','RCP Scenario','Internal'])
+plt.xlim(2020,2100)
+plt.ylim(0,0.7)
+plt.xticks(fontsize =30)
+plt.yticks(fontsize = 30)
+plt.subplot(1,2,2)
+plt.stackplot(np.arange(2020,2100), Var_total_10yr_mean[:,0],Var_total_10yr_mean[:,1],Var_total_10yr_mean[:,2]
+              ,Var_total_10yr_mean[:,3],Var_total_10yr_mean[:,4],labels = ['Climate Model', 'Stats Model', 'Tech Scenario','RCP Scenario','Internal'])
+plt.legend(loc='upper right', bbox_to_anchor=(1, -0.05), ncol = 5, fontsize = 30)
+plt.ylim(0,100)
+plt.xlim(2020,2100)
+plt.xticks(fontsize =30)
+plt.yticks(fontsize = 30)
+plt.ylabel('Fractional contribution %', fontsize = 30)
+plt.savefig('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/Almond_plots/plot_hnrg/almond-land-avg/Growth_stage_ACI_6_19/uncertainty_source_2020_2099.png', dpi =300)
+
+## without tech scenario
+Var_total_10yr_mean = np.zeros((80,5))
+Var_total_10yr_mean[:,0] = MC_time_series
+Var_total_10yr_mean[:,1] = MS_time_series
+Var_total_10yr_mean[:,2] = SR_time_series
+Var_total_10yr_mean[:,3] = Intvar_time_series
+for year in range(0,80):
+    Var_total_10yr_mean[year,:] = Var_total_10yr_mean[year,:] * 100 / np.sum(Var_total_10yr_mean[year,:])
+plt.figure(figsize = (30,13))
+plt.suptitle('Uncertainties', fontsize = 35, y = 0.95)
+plt.subplot(1,2,1)
+plt.stackplot(np.arange(2020,2100),MC_time_series,MS_time_series
+              ,SR_time_series,Intvar_time_series,labels = ['Climate Model', 'Stats Model', 'RCP Scenario','Internal'])
+plt.xlim(2020,2100)
+plt.ylim(0,0.7)
+plt.xticks(fontsize =30)
+plt.yticks(fontsize = 30)
+plt.subplot(1,2,2)
+plt.stackplot(np.arange(2020,2100), Var_total_10yr_mean[:,0],Var_total_10yr_mean[:,1]
+              ,Var_total_10yr_mean[:,2],Var_total_10yr_mean[:,3],labels = ['Climate Model', 'Stats Model', 'RCP Scenario','Internal'])
+plt.legend(loc='upper right', bbox_to_anchor=(1, -0.05), ncol = 5, fontsize = 30)
+plt.ylim(0,100)
+plt.xlim(2020,2100)
+plt.xticks(fontsize =30)
+plt.yticks(fontsize = 30)
+plt.ylabel('Fractional contribution %', fontsize = 30)
+plt.savefig('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/Almond_plots/plot_hnrg/almond-land-avg/Growth_stage_ACI_6_19/uncertainty_source_2020_2099_withouttech.png', dpi =300)
+
+
+## calculate probablity below 0.5Y
+yield_all_hist_rcp45 = np.load('C:/Users/Pancake/Box/Farm_Almond_data/projection/tech_2010/yield_all_hist_rcp45.npy')
+yield_all_hist_rcp45_s = np.load('C:/Users/Pancake/Box/Farm_Almond_data/projection/tech_2010/yield_all_hist_rcp45_s.npy')
+yield_all_hist_rcp85 = np.load('C:/Users/Pancake/Box/Farm_Almond_data/projection/tech_2010/yield_all_hist_rcp85.npy')
+yield_all_hist_rcp85_s = np.load('C:/Users/Pancake/Box/Farm_Almond_data/projection/tech_2010/yield_all_hist_rcp85_s.npy')
+yield_all_future_rcp45 = np.load('C:/Users/Pancake/Box/Farm_Almond_data/projection/tech_2010/yield_all_future_rcp45.npy')
+yield_all_future_rcp45_s = np.load('C:/Users/Pancake/Box/Farm_Almond_data/projection/tech_2010/yield_all_future_rcp45_s.npy')
+yield_all_future_rcp85 = np.load('C:/Users/Pancake/Box/Farm_Almond_data/projection/tech_2010/yield_all_future_rcp85.npy')
+yield_all_future_rcp85_s = np.load('C:/Users/Pancake/Box/Farm_Almond_data/projection/tech_2010/yield_all_future_rcp85_s.npy')
+
+yield_across_state_hist_rcp45 = np.load('C:/Users/Pancake/Box/Farm_Almond_data/projection/tech_2010/yield_across_state_hist_rcp45.npy')
+yield_across_state_hist_rcp45_s = np.load('C:/Users/Pancake/Box/Farm_Almond_data/projection/tech_2010/yield_across_state_hist_rcp45_s.npy')
+yield_across_state_hist_rcp85 = np.load('C:/Users/Pancake/Box/Farm_Almond_data/projection/tech_2010/yield_across_state_hist_rcp85.npy')
+yield_across_state_hist_rcp85_s = np.load('C:/Users/Pancake/Box/Farm_Almond_data/projection/tech_2010/yield_across_state_hist_rcp85_s.npy')
+yield_across_state_future_rcp45 = np.load('C:/Users/Pancake/Box/Farm_Almond_data/projection/tech_2010/yield_across_state_future_rcp45.npy')
+yield_across_state_future_rcp45_s = np.load('C:/Users/Pancake/Box/Farm_Almond_data/projection/tech_2010/yield_across_state_future_rcp45_s.npy')
+yield_across_state_future_rcp85 = np.load('C:/Users/Pancake/Box/Farm_Almond_data/projection/tech_2010/yield_across_state_future_rcp85.npy')
+yield_across_state_future_rcp85_s = np.load('C:/Users/Pancake/Box/Farm_Almond_data/projection/tech_2010/yield_across_state_future_rcp85_s.npy')
+
+yield_average_model_hist_rcp45 = np.load('C:/Users/Pancake/Box/Farm_Almond_data/projection/tech_2010/yield_average_model_hist_rcp45.npy')
+yield_average_model_hist_rcp45_s = np.load('C:/Users/Pancake/Box/Farm_Almond_data/projection/tech_2010/yield_average_model_hist_rcp45_s.npy')
+yield_average_model_hist_rcp85 = np.load('C:/Users/Pancake/Box/Farm_Almond_data/projection/tech_2010/yield_average_model_hist_rcp85.npy')
+yield_average_model_hist_rcp85_s = np.load('C:/Users/Pancake/Box/Farm_Almond_data/projection/tech_2010/yield_average_model_hist_rcp85_s.npy')
+yield_average_model_future_rcp45 = np.load('C:/Users/Pancake/Box/Farm_Almond_data/projection/tech_2010/yield_average_model_future_rcp45.npy')
+yield_average_model_future_rcp45_s = np.load('C:/Users/Pancake/Box/Farm_Almond_data/projection/tech_2010/yield_average_model_future_rcp45_s.npy')
+yield_average_model_future_rcp85 = np.load('C:/Users/Pancake/Box/Farm_Almond_data/projection/tech_2010/yield_average_model_future_rcp85.npy')
+yield_average_model_future_rcp85_s = np.load('C:/Users/Pancake/Box/Farm_Almond_data/projection/tech_2010/yield_average_model_future_rcp85_s.npy')
+
+
+yield_average_2001_2020_rcp45_s = (np.median(yield_average_model_hist_rcp45_s,axis=1)[-20:])
+prob_below_25_ave_yield_2080_2099_rcp45_s_yearly = np.zeros((20))
+prob_below_50_ave_yield_2080_2099_rcp45_s_yearly = np.zeros((20))
+prob_below_75_ave_yield_2080_2099_rcp45_s_yearly = np.zeros((20))
+for i in range(20):
+    prob_below_25_ave_yield_2080_2099_rcp45_s_yearly[i] = np.count_nonzero(yield_all_future_rcp45_s[-20:,:][i]<=(yield_average_2001_2020_rcp45_s*0.75)[i])*100/17000
+    prob_below_50_ave_yield_2080_2099_rcp45_s_yearly[i] = np.count_nonzero(yield_all_future_rcp45_s[-20:,:][i]<=(yield_average_2001_2020_rcp45_s*0.5)[i])*100/17000
+    prob_below_75_ave_yield_2080_2099_rcp45_s_yearly[i] = np.count_nonzero(yield_all_future_rcp45_s[-20:,:][i]<=(yield_average_2001_2020_rcp45_s*0.25)[i])*100/17000
+prob_below_25_ave_yield_2080_2099_rcp45_s_yearly = np.mean(prob_below_25_ave_yield_2080_2099_rcp45_s_yearly)
+prob_below_50_ave_yield_2080_2099_rcp45_s_yearly = np.mean(prob_below_50_ave_yield_2080_2099_rcp45_s_yearly)
+prob_below_75_ave_yield_2080_2099_rcp45_s_yearly = np.mean(prob_below_75_ave_yield_2080_2099_rcp45_s_yearly)
+df_prob_ave_25_yield_2080_2099_rcp45_s = pd.DataFrame({'year':['2080_2099'], 'type': ['below_25'], 'scenario' : ['rcp45'], 'prob' : prob_below_25_ave_yield_2080_2099_rcp45_s_yearly})
+df_prob_ave_50_yield_2080_2099_rcp45_s = pd.DataFrame({'year':['2080_2099'], 'type': ['below_50'], 'scenario' : ['rcp45'], 'prob' : prob_below_50_ave_yield_2080_2099_rcp45_s_yearly})
+df_prob_ave_75_yield_2080_2099_rcp45_s = pd.DataFrame({'year':['2080_2099'], 'type': ['below_75'], 'scenario' : ['rcp45'], 'prob' : prob_below_75_ave_yield_2080_2099_rcp45_s_yearly})
+
+
+yield_average_2001_2020_rcp85_s = (np.median(yield_average_model_hist_rcp85_s,axis=1)[-20:])
+prob_below_25_ave_yield_2080_2099_rcp85_s_yearly = np.zeros((20))
+prob_below_50_ave_yield_2080_2099_rcp85_s_yearly = np.zeros((20))
+prob_below_75_ave_yield_2080_2099_rcp85_s_yearly = np.zeros((20))
+for i in range(20):
+    prob_below_25_ave_yield_2080_2099_rcp85_s_yearly[i] = np.count_nonzero(yield_all_future_rcp85_s[-20:,:][i]<=(yield_average_2001_2020_rcp85_s*0.75)[i])*100/17000
+    prob_below_50_ave_yield_2080_2099_rcp85_s_yearly[i] = np.count_nonzero(yield_all_future_rcp85_s[-20:,:][i]<=(yield_average_2001_2020_rcp85_s*0.5)[i])*100/17000
+    prob_below_75_ave_yield_2080_2099_rcp85_s_yearly[i] = np.count_nonzero(yield_all_future_rcp85_s[-20:,:][i]<=(yield_average_2001_2020_rcp85_s*0.25)[i])*100/17000
+prob_below_25_ave_yield_2080_2099_rcp85_s_yearly = np.mean(prob_below_25_ave_yield_2080_2099_rcp85_s_yearly)
+prob_below_50_ave_yield_2080_2099_rcp85_s_yearly = np.mean(prob_below_50_ave_yield_2080_2099_rcp85_s_yearly)
+prob_below_75_ave_yield_2080_2099_rcp85_s_yearly = np.mean(prob_below_75_ave_yield_2080_2099_rcp85_s_yearly)
+
+df_prob_ave_25_yield_2080_2099_rcp85_s = pd.DataFrame({'year':['2080_2099'], 'type': ['below_25'], 'scenario' : ['rcp85'], 'prob' : prob_below_25_ave_yield_2080_2099_rcp85_s_yearly})
+df_prob_ave_50_yield_2080_2099_rcp85_s = pd.DataFrame({'year':['2080_2099'], 'type': ['below_50'], 'scenario' : ['rcp85'], 'prob' : prob_below_50_ave_yield_2080_2099_rcp85_s_yearly})
+df_prob_ave_75_yield_2080_2099_rcp85_s = pd.DataFrame({'year':['2080_2099'], 'type': ['below_75'], 'scenario' : ['rcp85'], 'prob' : prob_below_75_ave_yield_2080_2099_rcp85_s_yearly})
+
+
+prob_below_25_ave_yield_2040_2059_rcp45_s_yearly = np.zeros((20))
+prob_below_50_ave_yield_2040_2059_rcp45_s_yearly = np.zeros((20))
+prob_below_75_ave_yield_2040_2059_rcp45_s_yearly = np.zeros((20))
+for i in range(20):
+    prob_below_25_ave_yield_2040_2059_rcp45_s_yearly[i] = np.count_nonzero(yield_all_future_rcp45_s[19:39][i]<=(yield_average_2001_2020_rcp45_s*0.75)[i])*100/17000
+    prob_below_50_ave_yield_2040_2059_rcp45_s_yearly[i] = np.count_nonzero(yield_all_future_rcp45_s[19:39][i]<=(yield_average_2001_2020_rcp45_s*0.5)[i])*100/17000
+    prob_below_75_ave_yield_2040_2059_rcp45_s_yearly[i] = np.count_nonzero(yield_all_future_rcp45_s[19:39][i]<=(yield_average_2001_2020_rcp45_s*0.25)[i])*100/17000
+prob_below_25_ave_yield_2040_2059_rcp45_s_yearly = np.mean(prob_below_25_ave_yield_2040_2059_rcp45_s_yearly)
+prob_below_50_ave_yield_2040_2059_rcp45_s_yearly = np.mean(prob_below_50_ave_yield_2040_2059_rcp45_s_yearly)
+prob_below_75_ave_yield_2040_2059_rcp45_s_yearly = np.mean(prob_below_75_ave_yield_2040_2059_rcp45_s_yearly)
+
+df_prob_ave_25_yield_2040_2059_rcp45_s = pd.DataFrame({'year':['2040_2059'], 'type': ['below_25'], 'scenario' : ['rcp45'], 'prob' : prob_below_25_ave_yield_2040_2059_rcp45_s_yearly})
+df_prob_ave_50_yield_2040_2059_rcp45_s = pd.DataFrame({'year':['2040_2059'], 'type': ['below_50'], 'scenario' : ['rcp45'], 'prob' : prob_below_50_ave_yield_2040_2059_rcp45_s_yearly})
+df_prob_ave_75_yield_2040_2059_rcp45_s = pd.DataFrame({'year':['2040_2059'], 'type': ['below_75'], 'scenario' : ['rcp45'], 'prob' : prob_below_75_ave_yield_2040_2059_rcp45_s_yearly})
+
+
+prob_below_25_ave_yield_2040_2059_rcp85_s_yearly = np.zeros((20))
+prob_below_50_ave_yield_2040_2059_rcp85_s_yearly = np.zeros((20))
+prob_below_75_ave_yield_2040_2059_rcp85_s_yearly = np.zeros((20))
+for i in range(20):
+    prob_below_25_ave_yield_2040_2059_rcp85_s_yearly[i] = np.count_nonzero(yield_all_future_rcp85_s[19:39][i]<=(yield_average_2001_2020_rcp85_s*0.75)[i])*100/17000
+    prob_below_50_ave_yield_2040_2059_rcp85_s_yearly[i] = np.count_nonzero(yield_all_future_rcp85_s[19:39][i]<=(yield_average_2001_2020_rcp85_s*0.5)[i])*100/17000
+    prob_below_75_ave_yield_2040_2059_rcp85_s_yearly[i] = np.count_nonzero(yield_all_future_rcp85_s[19:39][i]<=(yield_average_2001_2020_rcp85_s*0.25)[i])*100/17000
+prob_below_25_ave_yield_2040_2059_rcp85_s_yearly = np.mean(prob_below_25_ave_yield_2040_2059_rcp85_s_yearly)
+prob_below_50_ave_yield_2040_2059_rcp85_s_yearly = np.mean(prob_below_50_ave_yield_2040_2059_rcp85_s_yearly)
+prob_below_75_ave_yield_2040_2059_rcp85_s_yearly = np.mean(prob_below_75_ave_yield_2040_2059_rcp85_s_yearly)
+
+df_prob_ave_25_yield_2040_2059_rcp85_s = pd.DataFrame({'year':['2040_2059'], 'type': ['below_25'], 'scenario' : ['rcp85'], 'prob' : prob_below_25_ave_yield_2040_2059_rcp85_s_yearly})
+df_prob_ave_50_yield_2040_2059_rcp85_s = pd.DataFrame({'year':['2040_2059'], 'type': ['below_50'], 'scenario' : ['rcp85'], 'prob' : prob_below_50_ave_yield_2040_2059_rcp85_s_yearly})
+df_prob_ave_75_yield_2040_2059_rcp85_s = pd.DataFrame({'year':['2040_2059'], 'type': ['below_75'], 'scenario' : ['rcp85'], 'prob' : prob_below_75_ave_yield_2041_2060_rcp85_s_yearly})
+
+
+##calculate num of year with % loss 
+def get_num_year_with_loss(obs, pred):
+    loss_percent_axis = np.linspace(0, 1, 21)
+    matrix = np.zeros(len(loss_percent_axis))
+    for i in range(len(loss_percent_axis)):
+        matrix_num_year[i] = np.count_nonzero(pred<=(1-loss_percent_axis[i])*obs)
+    matrix = np.zeros((len(pred),len(loss_percent_axis)))
+    return(matrix)
+
+yield_2020_rcp45_s = np.median(yield_average_model_hist_rcp45_s[-1])
+yield_2020_rcp85_s = np.median(yield_average_model_hist_rcp85_s[-1])
+matrix_percent_loss_num_year_rcp45 = np.zeros((21,17000))
+matrix_percent_loss_num_year_rcp85 = np.zeros((21,17000))
+for trial in range(17000):
+    matrix_percent_loss_num_year_rcp45[:,trial] = get_num_year_with_loss(yield_2020_rcp45_s, yield_all_future_rcp45_s[-20:,trial])
+    matrix_percent_loss_num_year_rcp85[:,trial] = get_num_year_with_loss(yield_2020_rcp85_s, yield_all_future_rcp85_s[-20:,trial])
+matrix_percent_loss_all_trial_rcp45 = np.zeros((20,21,17000))
+matrix_percent_loss_all_trial_rcp85 = np.zeros((20,21,17000))
+loss_percent_axis = np.linspace(0, 1, 21)
+for trial in range(17000):
+    for percent_loss in range(0,21):
+        matrix_percent_loss_all_trial_rcp45[:,percent_loss,trial] = (np.arange(1,21) <= matrix_percent_loss_num_year_rcp45[percent_loss,trial])*1
+        matrix_percent_loss_all_trial_rcp85[:,percent_loss,trial] = (np.arange(1,21) <= matrix_percent_loss_num_year_rcp85[percent_loss,trial])*1
+prob_percent_loss_year_rcp45 = np.mean(matrix_percent_loss_all_trial_rcp45,axis=2)[::-1]
+prob_percent_loss_year_rcp85 = np.mean(matrix_percent_loss_all_trial_rcp85,axis=2)[::-1]
+
+fig = plt.figure()
+fig.set_figheight(10)
+fig.set_figwidth(25)
+spec = gridspec.GridSpec(nrows=1, ncols=2, width_ratios=[1,1.2])
+ax1 = plt.subplot(spec[0,0])
+sns.heatmap(prob_percent_loss_year_rcp45, cmap = 'Oranges', cbar = False)
+plt.xticks(np.arange(0,21,2)+0.5, np.array(np.linspace(0,100,11)).astype(int), rotation = 45)
+plt.xticks(fontsize = 20)
+plt.yticks(np.arange(0,20)+0.5, np.arange(1,21)[::-1], fontsize = 20, rotation = 360)
+plt.title('RCP4.5', fontsize = 25)
+plt.ylabel('Number of years', fontsize = 25)
+plt.xlabel('Percentage of loss', fontsize = 25)
+ax2 = plt.subplot(spec[0,1])
+sns.heatmap(prob_percent_loss_year_rcp85, cmap = 'Oranges')
+plt.xticks(np.arange(0,21,2)+0.5, np.array(np.linspace(0,100,11)).astype(int), rotation = 45)
+plt.xticks(fontsize = 20)
+plt.yticks(np.arange(0,20)+0.5, np.arange(1,21)[::-1], fontsize = 20, rotation = 360)
+plt.title('RCP8.5', fontsize = 25)
+plt.xlabel('Percentage of loss', fontsize = 25)
+cbar = ax2.collections[0].colorbar
+cbar.ax.tick_params(labelsize=20)
+plt.savefig('C:/Users/Pancake/Box/UCDGlobalChange/shqwu/Almond_plots/plot_hnrg/almond-land-avg/Growth_stage_ACI_6_19/heatmap_percent_loss_year.png', dpi = 200)
+
+##calculate probablity std F-test
+#define F-test function
+def f_test(x, y):
+    x = np.array(x)
+    y = np.array(y)
+    x_var = np.var(x, ddof=1)
+    y_var = np.var(y, ddof=1)
+    if x_var > y_var:
+        var_large = x_var
+        var_small = y_var
+    else:
+        var_large = y_var
+        var_small = x_var
+    f = var_large/var_small #calculate F test statistic 
+    dfn = x.size-1 #define degrees of freedom numerator 
+    dfd = y.size-1 #define degrees of freedom denominator 
+    p = 1-st.f.cdf(f, dfn, dfd) #find p-value of F test statistic 
+    return f, p
+
+#rcp45
+yield_all_rcp45_s = np.row_stack((yield_all_hist_rcp45_s, yield_all_future_rcp45_s))
+
+f_test_result_2080_2099_rcp45 = np.zeros(17000)
+f_test_result_2040_2059_rcp45 = np.zeros(17000)
+for i in range(17000):
+    if f_test(yield_all_rcp45_s[21:41,i],yield_all_rcp45_s[100:120,i])[1]<0.05:
+        f_test_result_2080_2099_rcp45[i] = 1
+    else:
+        pass
+    if f_test(yield_all_rcp45_s[21:41,i],yield_all_rcp45_s[60:80,i])[1]<0.05:
+        f_test_result_2040_2059_rcp45[i] = 1
+    else:
+        pass
+prob_f_test_2080_2099_rcp45 = np.sum(f_test_result_2080_2099_rcp45)*100/17000
+prob_f_test_2040_2059_rcp45 = np.sum(f_test_result_2040_2059_rcp45)*100/17000
+df_prob_f_test_2040_2059_rcp45 = pd.DataFrame({'year':['2040_2059'], 'type': ['f_test'], 'scenario' : ['rcp45'], 'prob' : prob_f_test_2040_2059_rcp45})
+df_prob_f_test_2080_2099_rcp45 = pd.DataFrame({'year':['2080_2099'], 'type': ['f_test'], 'scenario' : ['rcp45'], 'prob' : prob_f_test_2080_2099_rcp45})
+
+#rcp85
+yield_all_rcp85_s = np.row_stack((yield_all_hist_rcp85_s, yield_all_future_rcp85_s))
+
+f_test_result_2080_2099_rcp85 = np.zeros(17000)
+f_test_result_2040_2059_rcp85 = np.zeros(17000)
+for i in range(17000):
+    if f_test(yield_all_rcp85_s[21:41,i],yield_all_rcp85_s[100:120,i])[1]<0.05:
+        f_test_result_2080_2099_rcp85[i] = 1
+    else:
+        pass
+    if f_test(yield_all_rcp85_s[21:41,i],yield_all_rcp45_s[60:80,i])[1]<0.05:
+        f_test_result_2040_2059_rcp85[i] = 1
+    else:
+        pass
+prob_f_test_2080_2099_rcp85 = np.sum(f_test_result_2080_2099_rcp85)*100/17000
+prob_f_test_2040_2059_rcp85 = np.sum(f_test_result_2040_2059_rcp85)*100/17000
+df_prob_f_test_2040_2059_rcp85 = pd.DataFrame({'year':['2040_2059'], 'type': ['f_test'], 'scenario' : ['rcp85'], 'prob' : prob_f_test_2040_2059_rcp85})
+df_prob_f_test_2080_2099_rcp85 = pd.DataFrame({'year':['2080_2099'], 'type': ['f_test'], 'scenario' : ['rcp85'], 'prob' : prob_f_test_2080_2099_rcp85})
+
+
+df_prob_variation = df_prob_below_half_ave_yield_2080_2099_rcp45_s.append(df_prob_below_half_ave_yield_2080_2099_rcp85_s).append(df_prob_below_half_ave_yield_2040_2059_rcp45_s).append(df_prob_below_half_ave_yield_2040_2059_rcp85_s).append(df_prob_f_test_2040_2059_rcp45).append(df_prob_f_test_2080_2099_rcp45).append(df_prob_f_test_2040_2059_rcp85).append(df_prob_f_test_2080_2099_rcp85)
+
 
 
 
